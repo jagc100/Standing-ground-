@@ -1,0 +1,809 @@
+<title>Standing Ground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bitter:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a sticky river of tabs above one working column; the tool opens on the Pathfinder, already showing a sample route. */
+:root{
+  --bg:#f5f8f6; --surface:#ffffff; --sunk:#e8efeb; --line:#cdd9d2;
+  --fg:#17261f; --muted:#4c6157;
+  --spruce:#1f5b46; --spruce-ink:#ffffff; --sky:#2c6f9a; --ochre:#9a6a12;
+  --ind-bg:#efe6f6; --ind-fg:#5a2f7a;
+  --warn-bg:#fff4dc; --warn-fg:#6b4a05; --crit-bg:#fde8e4; --crit-fg:#8a2414; --ok-bg:#e1f2e8; --ok-fg:#1f5b3c;
+  --display:"Bitter", Georgia, "Times New Roman", serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1714; --surface:#16211c; --sunk:#1d2a24; --line:#2c3d35;
+  --fg:#e3ece7; --muted:#9fb3a9;
+  --spruce:#5fb592; --spruce-ink:#0c1a14; --sky:#7cb8e0; --ochre:#e0b056;
+  --ind-bg:#2e2238; --ind-fg:#d9b8f0;
+  --warn-bg:#3a2e10; --warn-fg:#f3d38c; --crit-bg:#3d1c16; --crit-fg:#f6b3a5; --ok-bg:#16301f; --ok-fg:#9edcb6;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1714; --surface:#16211c; --sunk:#1d2a24; --line:#2c3d35;
+  --fg:#e3ece7; --muted:#9fb3a9;
+  --spruce:#5fb592; --spruce-ink:#0c1a14; --sky:#7cb8e0; --ochre:#e0b056;
+  --ind-bg:#2e2238; --ind-fg:#d9b8f0;
+  --warn-bg:#3a2e10; --warn-fg:#f3d38c; --crit-bg:#3d1c16; --crit-fg:#f6b3a5; --ok-bg:#16301f; --ok-fg:#9edcb6;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.6}
+a{color:var(--sky)} a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.2;margin:0}
+h2{font-size:1.65rem} h3{font-size:1.18rem}
+p{margin:0}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px}
+header.top{padding-block:22px 18px;border-bottom:1px solid var(--line)}
+.topbar{display:flex;justify-content:flex-end;margin-bottom:10px}
+.lang{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
+.lang button{font:inherit;font-size:.85rem;font-weight:700;background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer}
+.lang button[data-native]{border-style:dashed;font-weight:400}
+.lang button[aria-pressed="true"]{background:var(--spruce);color:var(--spruce-ink)}
+.brand{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.brand h1{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:800;color:var(--spruce)}
+.brand .tag{color:var(--muted);font-size:1rem}
+.lede{max-width:68ch;margin-top:10px}
+.welcome{margin-top:14px;display:grid;gap:6px;border:1px solid var(--line);border-left:4px solid var(--sky);background:var(--surface);border-radius:var(--r);padding:12px 16px;max-width:80ch}
+.notice{margin-top:10px;font-size:.92rem;background:var(--sunk);border-radius:var(--r);padding:10px 14px;max-width:80ch}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;padding-block:8px;scrollbar-width:thin}
+nav.tabs button{flex:0 0 auto;font:inherit;font-size:.95rem;font-weight:700;border:1px solid transparent;background:none;color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--spruce);color:var(--spruce-ink)}
+nav.tabs button:hover:not([aria-selected="true"]){border-color:var(--line);color:var(--fg)}
+main{padding-block:28px 60px}
+section.panel{display:grid;gap:22px}
+.intro{display:grid;gap:8px;max-width:72ch}
+.intro p{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:grid;gap:10px;align-content:start;min-width:0}
+label{font-weight:700;font-size:.95rem}
+select,input,textarea{font:inherit;font-size:1rem;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+.field{display:grid;gap:5px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row>.field{flex:1 1 220px}
+button.btn{font:inherit;font-weight:700;font-size:.95rem;background:var(--spruce);color:var(--spruce-ink);border:0;border-radius:8px;padding:10px 16px;cursor:pointer}
+button.ghost{font:inherit;font-size:.9rem;background:none;border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:7px 12px;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chipgroup{display:grid;gap:6px}
+.chipgroup small{font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.chip{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--spruce);border-color:var(--spruce);color:var(--spruce-ink)}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:2px 9px}
+.pill.urgent{background:var(--crit-bg);color:var(--crit-fg)}
+.pill.watch{background:var(--warn-bg);color:var(--warn-fg)}
+.pill.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.pill.kind{background:var(--sunk);color:var(--muted)}
+.pill.ind{background:var(--ind-bg);color:var(--ind-fg)}
+.route{display:grid;gap:18px}
+.route-head{display:grid;gap:6px;border-left:4px solid var(--spruce);padding-left:14px}
+.route-head .forum{color:var(--muted)}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:12px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:2.2rem 1fr;gap:10px;align-items:start}
+ol.steps li::before{content:counter(s);font-family:var(--display);font-weight:800;color:var(--spruce);background:var(--sunk);border-radius:50%;width:2.1rem;height:2.1rem;display:grid;place-items:center}
+.deadline{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:baseline}
+.deadline b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.res-list{display:grid;gap:10px}
+.res{display:grid;gap:3px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-width:0}
+.res a{font-weight:700;overflow-wrap:anywhere}
+.res .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.res p{font-size:.95rem;color:var(--muted)}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.phase>summary{cursor:pointer;padding:14px 18px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;font-family:var(--display);font-weight:700;font-size:1.1rem;list-style:none}
+.phase>summary::-webkit-details-marker{display:none}
+.count{font-family:var(--mono);font-size:.85rem;color:var(--muted);font-weight:400}
+.phase .body{padding:0 18px 18px;display:grid;gap:10px}
+.check{display:grid;grid-template-columns:1.4rem 1fr;gap:10px;align-items:start}
+.check input{width:1.2rem;height:1.2rem;margin-top:.25rem;accent-color:var(--spruce)}
+.check label{font-weight:400}
+.check small{display:block;color:var(--muted);font-size:.9rem}
+.progress{height:6px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.progress span{display:block;height:100%;background:var(--spruce);transition:width .3s}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.95rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.cite{font-family:var(--mono);font-size:.88rem;white-space:nowrap}
+.decoded{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.decoded div{background:var(--sunk);border-radius:8px;padding:10px 12px}
+.decoded small{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.decoded b{font-family:var(--mono);font-weight:500}
+.topic>summary{cursor:pointer;font-family:var(--display);font-weight:700;font-size:1.08rem;padding:14px 18px;list-style:none;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.topic>summary::-webkit-details-marker{display:none}
+.topic>summary::after{content:"+";color:var(--muted);margin-left:auto}
+.topic[open]>summary::after{content:"–"}
+.topic .body{padding:0 18px 18px;display:grid;gap:10px;max-width:75ch}
+.gloss{display:grid;gap:12px}
+.gloss dt{font-weight:700}
+.gloss dd{margin:2px 0 0;color:var(--muted)}
+.result{background:var(--ok-bg);color:var(--ok-fg);border-radius:var(--r);padding:12px 14px;font-weight:700}
+.result.alert{background:var(--warn-bg);color:var(--warn-fg)}
+.events{display:grid;gap:8px}
+.event{display:grid;grid-template-columns:7.5rem 1fr auto;gap:10px;align-items:start;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.event time{font-family:var(--mono);font-size:.88rem;font-variant-numeric:tabular-nums}
+.event p{min-width:0;overflow-wrap:anywhere}
+.example-flag{font-size:.8rem;color:var(--ochre);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.empty{color:var(--muted);font-style:italic}
+.copybox{font-family:var(--mono);font-size:.85rem;background:var(--sunk);border-radius:8px;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto}
+.langcard h3{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.langcard h3 span{font-family:var(--body);font-size:.95rem;font-weight:400;color:var(--muted)}
+.status{display:flex;gap:10px;align-items:flex-start;background:var(--warn-bg);color:var(--warn-fg);border-radius:8px;padding:10px 12px;font-size:.95rem}
+ul.plain{margin:0;padding-left:1.2rem;display:grid;gap:6px}
+footer{border-top:1px solid var(--line);padding-block:22px 40px;color:var(--muted);font-size:.9rem}
+footer .wrap{display:grid;gap:8px;max-width:80ch;margin-left:auto;margin-right:auto}
+@media (max-width:520px){.event{grid-template-columns:1fr auto}.event time{grid-column:1/-1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar"><div class="lang" role="group" aria-label="Language"><button data-lang="en" aria-pressed="true">English</button><button data-native="0" aria-pressed="false" title="In preparation">Nēhiyawēwin</button><button data-native="1" aria-pressed="false" title="In preparation">Anishinaabemowin</button><button data-native="2" aria-pressed="false" title="In preparation">Dene</button><button data-native="3" aria-pressed="false" title="In preparation">ᐃᓄᒃᑎᑐᑦ</button><button data-native="4" aria-pressed="false" title="In preparation">Michif</button></div></div>
+    <div class="brand">
+      <h1>Standing Ground</h1>
+      <span class="tag" data-t="tag"></span>
+    </div>
+    <p class="lede" data-t="lede"></p>
+    <div class="welcome" data-t="welcome"></div>
+    <p class="notice" data-t="notice"></p>
+  </div>
+</header>
+
+<nav class="tabs" data-t-aria="navAria">
+  <div class="wrap" role="tablist">
+    <button role="tab" data-tab="path" aria-selected="true" data-t="t_path"></button>
+    <button role="tab" data-tab="prep" aria-selected="false" data-t="t_prep"></button>
+    <button role="tab" data-tab="file" aria-selected="false" data-t="t_file"></button>
+    <button role="tab" data-tab="law" aria-selected="false" data-t="t_law"></button>
+    <button role="tab" data-tab="rights" aria-selected="false" data-t="t_rights"></button>
+    <button role="tab" data-tab="help" aria-selected="false" data-t="t_help"></button>
+    <button role="tab" data-tab="langs" aria-selected="false" data-t="t_langs"></button>
+    <button role="tab" data-tab="words" aria-selected="false" data-t="t_words"></button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section class="panel" id="tab-path">
+  <div class="intro"><h2 data-t="path_h"></h2><p data-t="path_p"></p></div>
+  <div class="card">
+    <div class="row">
+      <div class="field"><label for="pf-prov" data-t="pf_where"></label><select id="pf-prov"></select></div>
+      <div class="field"><label for="pf-role" data-t="pf_role"></label><select id="pf-role"></select></div>
+    </div>
+    <div class="field"><b id="pf-matter-label" data-t="pf_what"></b><div id="pf-matter" style="display:grid;gap:12px" role="group" aria-labelledby="pf-matter-label"></div></div>
+  </div>
+  <div id="pf-out" class="route" aria-live="polite"></div>
+</section>
+
+<section class="panel" id="tab-prep" hidden>
+  <div class="intro"><h2 data-t="prep_h"></h2><p data-t="prep_p"></p></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><b data-t="prep_overall"></b><span id="prep-total" class="count"></span></div>
+    <div class="progress"><span id="prep-bar" style="width:0%"></span></div>
+  </div>
+  <div id="prep-phases" style="display:grid;gap:12px"></div>
+  <div class="card"><h3 data-t="binder_h"></h3><p data-t="binder_p"></p><ol class="steps" id="binder"></ol></div>
+</section>
+
+<section class="panel" id="tab-file" hidden>
+  <div class="intro"><h2 data-t="file_h"></h2><p data-t="file_p"></p></div>
+  <div class="grid2">
+    <div class="card">
+      <h3 data-t="dl_h"></h3><p style="color:var(--muted)" data-t="dl_p"></p>
+      <div class="field"><label for="dl-type" data-t="dl_type"></label><select id="dl-type"></select></div>
+      <div class="field"><label for="dl-date" data-t="dl_start"></label><input type="date" id="dl-date"></div>
+      <div class="field" id="dl-custom-wrap" hidden><label for="dl-custom" data-t="dl_days"></label><input type="number" id="dl-custom" min="1" value="30"></div>
+      <div id="dl-out" aria-live="polite"></div>
+      <p id="dl-note" style="font-size:.9rem;color:var(--muted)"></p>
+    </div>
+    <div class="card">
+      <h3 data-t="ev_h"></h3><p style="color:var(--muted)" data-t="ev_p"></p>
+      <div class="row">
+        <div class="field" style="flex:0 1 170px"><label for="ev-date" data-t="ev_date"></label><input type="date" id="ev-date"></div>
+        <div class="field"><label for="ev-text" data-t="ev_what"></label><input id="ev-text"></div>
+      </div>
+      <div><button class="btn" id="ev-add" data-t="ev_add"></button></div>
+      <div id="ev-flag" class="example-flag" hidden data-t="ev_flag"></div>
+      <div class="events" id="ev-list"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3 data-t="af_h"></h3><p style="color:var(--muted)" data-t="af_p"></p>
+    <div class="row">
+      <div class="field"><label for="af-name" data-t="af_name"></label><input id="af-name"></div>
+      <div class="field"><label for="af-place" data-t="af_place"></label><input id="af-place"></div>
+    </div>
+    <div class="copybox" id="af-out"></div>
+    <div><button class="ghost" id="af-copy" data-t="copy"></button> <span id="af-msg" style="font-size:.9rem;color:var(--muted)"></span></div>
+  </div>
+</section>
+
+<section class="panel" id="tab-law" hidden>
+  <div class="intro"><h2 data-t="law_h"></h2><p data-t="law_p"></p></div>
+  <div class="card">
+    <h3 data-t="cite_h"></h3><p style="color:var(--muted)" data-t="cite_p"></p>
+    <div class="field"><label for="cite-in" data-t="cite_l"></label><input id="cite-in" value="2017 SCC 23"></div>
+    <div id="cite-out"></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3 data-t="canlii_h"></h3><ol class="steps" id="canlii-steps"></ol></div>
+    <div class="card"><h3 data-t="db_h"></h3><div class="res-list" id="db-list"></div></div>
+  </div>
+  <div class="card">
+    <h3 data-t="cases_h"></h3><p style="color:var(--muted)" data-t="cases_p"></p>
+    <div class="chips" id="case-filter" role="group"></div>
+    <div class="tablewrap"><table><thead><tr><th data-t="th_case"></th><th data-t="th_cite"></th><th data-t="th_why"></th></tr></thead><tbody id="case-rows"></tbody></table></div>
+  </div>
+</section>
+
+<section class="panel" id="tab-rights" hidden>
+  <div class="intro"><h2 data-t="rights_h"></h2><p data-t="rights_p"></p></div>
+  <div id="topics" style="display:grid;gap:10px"></div>
+</section>
+
+<section class="panel" id="tab-help" hidden>
+  <div class="intro"><h2 data-t="help_h"></h2><p data-t="help_p"></p></div>
+  <div class="card">
+    <div class="row">
+      <div class="field"><label for="dir-prov" data-t="dir_prov"></label><select id="dir-prov"></select></div>
+      <div class="field"><label for="dir-q" data-t="dir_q"></label><input id="dir-q"></div>
+    </div>
+    <div class="chips" id="dir-kinds" role="group"></div>
+  </div>
+  <p id="dir-count" style="color:var(--muted)"></p>
+  <div class="res-list" id="dir-list"></div>
+</section>
+
+<section class="panel" id="tab-langs" hidden>
+  <div class="intro"><h2 data-t="langs_h"></h2><p data-t="langs_p"></p></div>
+  <div class="card">
+    <h3 data-t="interp_h"></h3><p style="color:var(--muted)" data-t="interp_p"></p>
+    <div class="row">
+      <div class="field"><label for="ir-lang" data-t="ir_lang"></label><input id="ir-lang"></div>
+      <div class="field"><label for="ir-court" data-t="ir_court"></label><input id="ir-court"></div>
+      <div class="field"><label for="ir-file" data-t="ir_file"></label><input id="ir-file"></div>
+      <div class="field"><label for="ir-date" data-t="ir_date"></label><input type="date" id="ir-date"></div>
+    </div>
+    <div class="copybox" id="ir-out"></div>
+    <div><button class="ghost" id="ir-copy" data-t="copy"></button> <span id="ir-msg" style="font-size:.9rem;color:var(--muted)"></span></div>
+  </div>
+  <div id="lang-cards" style="display:grid;gap:14px"></div>
+  <div class="card">
+    <h3 data-t="kit_h"></h3><p style="color:var(--muted)" data-t="kit_p"></p>
+    <div class="copybox" id="kit-out"></div>
+    <div><button class="ghost" id="kit-copy" data-t="copy"></button> <span id="kit-msg" style="font-size:.9rem;color:var(--muted)"></span></div>
+  </div>
+</section>
+
+<section class="panel" id="tab-words" hidden>
+  <div class="intro"><h2 data-t="words_h"></h2><p data-t="words_p"></p></div>
+  <div class="field" style="max-width:420px"><label for="gl-q" data-t="gl_find"></label><input id="gl-q"></div>
+  <dl class="gloss card" id="gloss"></dl>
+</section>
+
+</main>
+
+<footer><div class="wrap"><p data-t="foot1"></p><p data-t="foot2"></p></div></footer>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store={get(k,d){try{const v=localStorage.getItem("sg:"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem("sg:"+k,JSON.stringify(v))}catch(e){}}};
+const link=(u,t)=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t||u)}</a>`;
+const LANG="en";
+const T=x=>x==null?"":x;
+const L=en=>en;
+const ord=n=>n+((n%100>=11&&n%100<=13)?"th":({1:"st",2:"nd",3:"rd"}[n%10]||"th"));
+
+/* ================= Interface strings ================= */
+const S={
+ tag:L("Court preparation for people representing themselves in Canada"),
+ lede:L("This guide sets out how the courts work, what to do in what order, where to look up the law, and who can help you for free. It assumes no prior knowledge. Any court term you meet is explained in the Words tab."),
+ welcome:L("<b>Built first for First Nations, Métis and Inuit people, and open to everyone.</b> <span>Anyone in Canada who has to face a court or tribunal without a lawyer can use every part of this tool, whatever their background, language or where they came from. Sections that apply only to First Nations, Métis or Inuit people carry a <span class=\"pill ind\">FNMI</span> label. Everything else is for everyone.</span>"),
+ notice:L("<b>This is legal information, not legal advice.</b> It explains how the system works. It does not know the facts of your case. Rules, deadlines and links change. Check anything important with the court registry, a courtworker, legal aid, or a lawyer. If you are struggling, call or text <b>9-8-8</b> (Suicide Crisis Helpline, all of Canada). First Nations, Inuit and Métis people can also reach the Hope for Wellness Help Line at <b>1-855-242-3310</b>."),
+ navAria:L("Sections"),
+ t_path:L("1 · Find your path"),t_prep:L("2 · Prepare for court"),t_file:L("3 · My case file"),t_law:L("4 · Look up the law"),t_rights:L("5 · Rights & issues"),t_help:L("6 · Who can help"),t_langs:L("Languages"),t_words:L("Words"),
+ path_h:L("Find your path"),
+ path_p:L("Choose where you are and what the problem is about. You will get the likely court or tribunal, the first steps, the deadlines to watch, and the people who can help near you. Courts call this \"finding the right forum.\" Choosing the wrong one wastes time and filing fees."),
+ pf_where:L("Where are you (or where is the case)?"),pf_role:L("Your position"),pf_what:L("What is it about?"),
+ grp_all:L("For everyone"),grp_ind:L("First Nations, Métis & Inuit"),
+ forum_l:L("Where it is usually decided:"),first:L("First steps"),dls:L("Deadlines to watch"),
+ dls_note:L("These are typical. Confirm the exact rule for your case with the registry."),count_btn:L("Count a deadline →"),
+ lawgov:L("The law that governs it"),rules_forms:L("Court rules and forms:"),whohelp:L("Who can help with this"),
+ prep_h:L("Prepare for court, step by step"),
+ prep_p:L("These are the steps lawyers follow by habit. They apply to most civil and family cases. Your ticks are saved only in this browser on this device."),
+ prep_overall:L("Overall progress"),of:L("of"),done:L("done"),
+ binder_h:L("Your court binder"),
+ binder_p:L("Bring a binder to every hearing, and bring copies for the judge and the other side if the court asks for them. Put dividers in this order so that you can find any page quickly when the judge asks."),
+ file_h:L("My case file"),
+ file_p:L("Work out deadlines, keep a timeline of what happened, and draft your facts. All of this is saved only in this browser on this device. It is not sent anywhere. Because nothing leaves this device, clearing your browser will erase it, so copy anything important somewhere safe."),
+ dl_h:L("Deadline counter"),dl_p:L("Missing a deadline can end a case before anyone looks at the merits. Pick what you are counting toward and the day the clock started."),
+ dl_type:L("Deadline type"),dl_start:L("Start date (the day of the decision or event)"),dl_days:L("Number of days"),
+ due:L("Due:"),passed:L(n=>`This date passed ${n} day${n===1?"":"s"} ago. Ask the court right away about an extension of time.`),
+ today:L("That is today."),left:L(n=>`${n} day${n===1?"":"s"} from today.`),
+ weekend:L(" It falls on a weekend. Most rules move it to the next business day, but file earlier to be safe."),
+ estimate:L(" This is an estimate. Holidays and the rules on counting days can change the date. Confirm with the registry."),
+ ev_h:L("Timeline of events"),ev_p:L("Judges think in dates. Write down each thing that happened, when, and what proves it (a letter, text, photo, witness)."),
+ ev_date:L("Date"),ev_what:L("What happened, and the proof"),ev_add:L("Add to timeline"),ev_flag:L("Example entries · replace with your own"),
+ ev_ph:L("e.g. Got eviction letter from landlord (Exhibit A)"),ev_need:L("Add both a date and what happened"),
+ ev_empty:L("No entries yet. Add the first thing that happened."),remove:L("Remove"),
+ af_h:L("Draft your facts in affidavit form"),
+ af_p:L("An <b>affidavit</b> is your evidence in writing, sworn or affirmed to be true. Courts expect it in numbered paragraphs, one fact per paragraph, in the order things happened, saying only what you saw, heard or did yourself. Opinions and arguments go in your written argument, not here. Your timeline above is turned into numbered paragraphs below as a starting draft. Use your court's official affidavit form for the final version."),
+ af_name:L("Your full name"),af_place:L("Your community / city and province"),
+ copy:L("Copy"),copied:L("Copied."),selected:L("Text selected. Press Ctrl+C (or Cmd+C) to copy."),
+ law_h:L("Look up the law"),law_p:L("Almost all Canadian court decisions and laws are free online. You do not need a paid database. The judge will want to know which law and which past decisions support what you are asking for."),
+ cite_h:L("Read a case citation"),cite_p:L("Lawyers write cases in a short code called a <b>neutral citation</b>. Type one in to see what it means and open it on CanLII."),
+ cite_l:L("Citation"),
+ cite_help:L("Enter a citation like <code>2014 SCC 44</code> or <code>2023 SKCA 12 at para 30</code>. Older cases look like <code>[1990] 1 SCR 1075</code>, which you can paste straight into CanLII search."),
+ c_year:L("Year decided"),c_court:L("Court"),c_no:L("Decision number"),c_para:L("Paragraph"),
+ c_unknown:L("Court code not in this list. Search it on CanLII."),
+ c_appeal:L("Provincial appeal court. Binds lower courts in that province."),
+ c_fed:L("Federal court or tribunal."),c_trial:L("Trial-level court. Persuasive, and binding on no other judge."),
+ c_scc:L("Top court. Binds every court in Canada."),c_fca:L("Appeal court. Binds the Federal Court."),
+ c_nth:L((no,yr)=>`This was the court's ${ord(no)} published decision of ${yr}.`),
+ c_find:L("Find it on CanLII"),
+ canlii_h:L("How to search CanLII well"),db_h:L("Free databases"),
+ db_more:L("Each province's court website has its own rules and forms. Look them up in tab 6."),
+ cases_h:L("Key decisions for self-reps and Indigenous rights"),
+ cases_p:L("These are Supreme Court of Canada cases. The first applies to every self-represented person. Always read the case itself before you rely on it. A summary is not enough for court."),
+ th_case:L("Case"),th_cite:L("Citation"),th_why:L("Why it matters to you"),
+ rights_h:L("Rights and issues that come up often"),
+ rights_p:L("Open a topic for a plain-language summary, the law that governs it, and where the problem is usually decided. Topics marked FNMI apply only to First Nations, Métis and Inuit people. The others apply to everyone."),
+ help_h:L("Who can help"),help_p:L("Representing yourself does not mean doing it alone. Courtworkers, legal aid, public legal education groups and law school clinics are free or low cost. Many can review your papers even if they cannot go to court with you."),
+ dir_prov:L("Province or territory"),dir_q:L("Search"),dir_ph:L("e.g. family, courtworker, appeal"),
+ dir_count:L((n,l,p)=>`${n} resource${n===1?"":"s"}${p?` · ${l} in ${p}, the rest national`:""}.`),
+ dir_none:L(" No province-specific listings yet. Start with legal aid in your province and the Indigenous Courtwork Program page."),
+ dir_empty:L("Nothing matches. Try fewer words or clear the filters."),
+ national:L("National"),
+ langs_h:L("Languages"),
+ langs_p:L("You have the right to understand and be understood in court. Standing Ground is presented in English, with versions in Nēhiyawēwin (Cree), Anishinaabemowin (Ojibwe), Dene languages, Inuktitut and Michif being prepared with fluent speakers. Choose a language at the top of the page to see its status. They are not machine-translated, because a mistranslated deadline or right can cost someone their case. Until those versions are ready, the tools below help you get language support now."),
+ interp_h:L("Ask the court for an interpreter (any language)"),
+ interp_p:L("Courts in Canada arrange interpreters so that parties and witnesses can understand and take part, in Indigenous languages, sign languages and languages from around the world. Ask in writing as early as possible and name your dialect. Fill in the boxes, copy the letter, and send it to the court registry."),
+ ir_lang:L("Language and dialect"),ir_court:L("Court and location"),ir_file:L("Court file number"),ir_date:L("Hearing date"),
+ kit_h:L("Translator kit"),
+ kit_p:L("Are you a fluent speaker, language keeper or community translator who wants to help? Copy this list of core terms and send your translations, with the dialect and writing system you used, to the project team. Every translation is checked by a second speaker before it goes live."),
+ status_lbl:L("In preparation with fluent speakers"),
+ now_lbl:L("Available now"),
+ words_h:L("Court words in plain language"),
+ words_p:L("Courts use old and specialized words. These words do not mean you are behind. They are the system's own vocabulary, and anyone can learn them."),
+ gl_find:L("Find a word"),gl_empty:L("No match. Try a shorter word."),
+ foot1:L("<b>Standing Ground</b> provides legal information, not legal advice, and no lawyer–client relationship is created by using it. Deadlines, rules and organizations change. Links were checked in October 2026. Confirm anything important with the court registry or a lawyer."),
+ foot2:L("Open to everyone in Canada. Your notes, ticks and timeline stay in this browser on this device only."),
+ fnmi:L("FNMI")
+};
+
+/* ================= Data ================= */
+const PROV={CA:L("All of Canada (federal)"),SK:L("Saskatchewan"),AB:L("Alberta"),BC:L("British Columbia"),MB:L("Manitoba"),ON:L("Ontario"),QC:L("Quebec"),NS:L("Nova Scotia"),NB:L("New Brunswick"),PE:L("Prince Edward Island"),NL:L("Newfoundland and Labrador"),YT:L("Yukon"),NT:L("Northwest Territories"),NU:L("Nunavut")};
+const SUP={SK:L("Court of King's Bench for Saskatchewan"),AB:L("Court of King's Bench of Alberta"),BC:L("Supreme Court of British Columbia"),MB:L("Court of King's Bench of Manitoba"),ON:L("Ontario Superior Court of Justice"),QC:L("Superior Court of Quebec"),NS:L("Supreme Court of Nova Scotia"),NB:L("Court of King's Bench of New Brunswick"),PE:L("Supreme Court of Prince Edward Island"),NL:L("Supreme Court of Newfoundland and Labrador"),YT:L("Supreme Court of Yukon"),NT:L("Supreme Court of the Northwest Territories"),NU:L("Nunavut Court of Justice"),CA:L("your province's superior court")};
+const sup=p=>T(SUP[p]);
+const COURTSITE={SK:"https://sasklawcourts.ca",AB:"https://www.albertacourts.ca",BC:"https://www.bccourts.ca",MB:"https://www.manitobacourts.mb.ca",ON:"https://www.ontariocourts.ca",QC:"https://www.tribunaux.qc.ca",NS:"https://www.courts.ns.ca",NU:"https://www.nunavutcourts.ca",CA:"https://www.fct-cf.gc.ca"};
+const KINDS={court:L("Courtworker"),aid:L("Legal aid & clinics"),info:L("Plain-language guides"),law:L("Laws & cases"),body:L("Tribunal / complaint body"),well:L("Support & wellness")};
+
+const DIR=[
+ {p:"CA",k:"law",n:"Canadian Judicial Council – Statement of Principles on Self-represented Litigants",u:"https://cjc-ccm.ca",d:L("The principles judges follow to make court fair for people without lawyers. The Supreme Court endorsed them in Pintea v Johns (2017 SCC 23). Cite them when you ask for help understanding the process.")},
+ {p:"CA",k:"court",i:1,n:"Indigenous Courtwork Program (Justice Canada)",u:"https://www.justice.gc.ca/eng/fund-fina/gov-gouv/acp-apc/index.html",d:L("Courtworkers are Indigenous support workers who explain the process, help with forms and connect you to legal aid. The program runs in every province and territory except Newfoundland and Labrador and now includes family, child protection and some civil matters.")},
+ {p:"CA",k:"info",n:"National Self-Represented Litigants Project",u:"https://representingyourselfcanada.com",d:L("Free guides written for people without lawyers: preparing for hearings, negotiating, dealing with opposing lawyers, and finding cases.")},
+ {p:"CA",k:"law",n:"CanLII",u:"https://www.canlii.org",d:L("Free database of almost every Canadian court decision, statute and regulation.")},
+ {p:"CA",k:"law",n:"Justice Laws Website",u:"https://laws-lois.justice.gc.ca",d:L("Official text of federal laws, including the Constitution Act, 1982, the Charter, the Indian Act and FHRMIRA.")},
+ {p:"CA",k:"law",n:"Supreme Court of Canada",u:"https://www.scc-csc.ca",d:L("Judgments, plus guides for self-represented parties applying for leave to appeal and calculating deadlines.")},
+ {p:"CA",k:"body",n:"Federal Court",u:"https://www.fct-cf.gc.ca",d:L("Hears immigration and refugee matters, judicial reviews of federal decisions (including band councils), and some claims against Canada. It has a self-represented litigant section and fillable forms.")},
+ {p:"CA",k:"body",n:"Canadian Human Rights Commission",u:"https://www.chrc-ccdp.gc.ca",d:L("Discrimination complaints against federal departments, First Nations governments and federally regulated employers (banks, airlines, telecom). Usually must be filed within one year.")},
+ {p:"CA",k:"body",i:1,n:"Specific Claims Tribunal",u:"https://www.sct-trp.ca",d:L("Decides First Nations' historic claims that Canada broke treaty promises or mismanaged reserve land or money. Brought by a First Nation, not an individual.")},
+ {p:"CA",k:"info",i:1,n:"Indigenous Law Centre, University of Saskatchewan",u:"https://indigenouslaw.usask.ca",d:L("Founded in 1975 as the Native Law Centre. Publishes Indigenous law research and decisions.")},
+ {p:"CA",k:"aid",i:1,n:"Indigenous Bar Association",u:"https://www.indigenousbar.ca",d:L("National association of Indigenous lawyers, judges and law students. A starting point for finding an Indigenous lawyer.")},
+ {p:"CA",k:"info",i:1,n:"Matrimonial real property on reserve (ISC)",u:"https://www.sac-isc.gc.ca/eng/1100100032553",d:L("Federal plain-language guide to the family home on reserve after a separation or death.")},
+ {p:"CA",k:"well",n:"9-8-8 Suicide Crisis Helpline",u:"https://988.ca",d:L("Call or text 9-8-8, 24 hours a day, anywhere in Canada.")},
+ {p:"CA",k:"well",i:1,n:"Hope for Wellness Help Line · 1-855-242-3310",u:"https://www.hopeforwellness.ca",d:L("Free 24-hour counselling and crisis support for First Nations, Inuit and Métis people, in English, and in Cree, Ojibwe and Inuktitut on request.")},
+ {p:"SK",k:"law",n:"Saskatchewan Courts",u:"https://sasklawcourts.ca",d:L("Official Rules of Court, forms, practice directives, and self-represented guidebooks for King's Bench and the Court of Appeal.")},
+ {p:"SK",k:"aid",n:"Legal Aid Saskatchewan",u:"https://www.legalaid.sk.ca",d:L("Free lawyers for eligible people in criminal and family matters, including child protection.")},
+ {p:"SK",k:"info",n:"PLEA (Public Legal Education Association of Saskatchewan)",u:"https://www.plea.org",d:L("Plain-language guides on family law, wills, housing, and going to court in Saskatchewan.")},
+ {p:"SK",k:"aid",n:"Pro Bono Law Saskatchewan",u:"https://www.pblsask.ca",d:L("Up to one hour of free advice from a volunteer lawyer for low-income residents, at clinics across the province or by phone. Intake line: 1-855-833-7257.")},
+ {p:"SK",k:"aid",n:"Law Society of Saskatchewan",u:"https://www.lawsociety.sk.ca",d:L("Lawyer directory. You can check a lawyer's standing and find someone in your area.")},
+ {p:"SK",k:"body",n:"Saskatchewan Human Rights Commission",u:"https://saskatchewanhumanrights.ca",d:L("Discrimination complaints about provincial matters (housing, jobs, services). Watch the one-year filing window.")},
+ {p:"SK",k:"body",n:"Ombudsman Saskatchewan",u:"https://ombudsman.sk.ca",d:L("Complaints about unfair treatment by provincial government offices. Free, and separate from any court case.")},
+ {p:"AB",k:"court",i:1,n:"Native Counselling Services of Alberta",u:"https://www.ncsa.ca",d:L("Delivers Indigenous courtwork services across Alberta, including family court.")},
+ {p:"AB",k:"aid",n:"Legal Aid Alberta",u:"https://www.legalaid.ab.ca",d:L("Legal representation and advice for eligible Albertans in family, child welfare and criminal matters.")},
+ {p:"AB",k:"info",n:"CPLEA (Centre for Public Legal Education Alberta)",u:"https://www.cplea.ca",d:L("Plain-language booklets on tenancy, family and court procedure.")},
+ {p:"AB",k:"info",n:"LawCentral Alberta",u:"https://www.lawcentralalberta.ca",d:L("Directory of Alberta legal help and court information.")},
+ {p:"AB",k:"law",n:"Alberta Courts",u:"https://www.albertacourts.ca",d:L("Forms, rules and self-help guides for Alberta's courts.")},
+ {p:"BC",k:"court",i:1,n:"Native Courtworker and Counselling Association of BC",u:"https://www.nccabc.ca",d:L("Indigenous courtworkers throughout British Columbia.")},
+ {p:"BC",k:"aid",i:1,n:"BC First Nations Justice Council",u:"https://bcfnjc.com",d:L("Runs Indigenous Justice Centres across BC that give free, culturally safe legal help, mainly in criminal and child protection matters, with wraparound supports.")},
+ {p:"BC",k:"info",n:"Legal Aid BC (incl. Aboriginal Legal Aid)",u:"https://legalaid.bc.ca",d:L("Family, child protection and criminal legal aid, plus plain-language guides, including pages on legal issues on reserve.")},
+ {p:"BC",k:"info",n:"Clicklaw",u:"https://www.clicklaw.bc.ca",d:L("Gateway to BC legal information and help, including court guides for self-reps.")},
+ {p:"BC",k:"aid",n:"Access Pro Bono",u:"https://accessprobono.ca",d:L("Free summary advice clinics with volunteer lawyers across BC.")},
+ {p:"MB",k:"aid",n:"Legal Aid Manitoba",u:"https://www.legalaid.mb.ca",d:L("Legal representation for eligible people, plus Manitoba's courtworker services.")},
+ {p:"MB",k:"info",n:"Community Legal Education Association (Manitoba)",u:"https://www.communitylegal.mb.ca",d:L("Law Phone-In and Lawyer Referral, plus plain-language guides.")},
+ {p:"MB",k:"law",n:"Manitoba Courts",u:"https://www.manitobacourts.mb.ca",d:L("Forms, rules and practice directions.")},
+ {p:"ON",k:"aid",i:1,n:"Aboriginal Legal Services",u:"https://www.aboriginallegal.ca",d:L("Indigenous-run legal clinic and courtworker program in Ontario, including family work.")},
+ {p:"ON",k:"aid",i:1,n:"Nishnawbe-Aski Legal Services",u:"https://www.nanlegal.on.ca",d:L("Legal services and courtworkers for Nishnawbe Aski Nation communities in northern Ontario. Toll-free: 1-800-465-5581.")},
+ {p:"ON",k:"info",n:"Steps to Justice",u:"https://stepstojustice.ca",d:L("Step-by-step answers to everyday legal problems in Ontario, with forms and referrals.")},
+ {p:"ON",k:"info",n:"CLEO (Community Legal Education Ontario)",u:"https://www.cleo.on.ca",d:L("Free plain-language legal publications in many languages.")},
+ {p:"ON",k:"aid",n:"Legal Aid Ontario",u:"https://www.legalaid.on.ca",d:L("Legal aid certificates, family law service centres, and community legal clinics.")},
+ {p:"ON",k:"law",n:"Ontario Courts",u:"https://www.ontariocourts.ca",d:L("Links to each Ontario court's rules, forms and practice directions.")},
+ {p:"QC",k:"info",n:"Éducaloi",u:"https://educaloi.qc.ca",d:L("Plain-language legal information for Quebec, in French and English.")},
+ {p:"QC",k:"aid",n:"Commission des services juridiques (Legal aid Quebec)",u:"https://www.csj.qc.ca",d:L("Quebec's legal aid network.")},
+ {p:"QC",k:"law",n:"Tribunaux judiciaires du Québec",u:"https://www.tribunaux.qc.ca",d:L("Portal for Quebec's courts.")},
+ {p:"NS",k:"court",i:1,n:"Mi'kmaw Legal Support Network",u:"https://www.mlsn.ca",d:L("Mi'kmaw courtworkers, customary law and family support in Nova Scotia.")},
+ {p:"NS",k:"aid",n:"Nova Scotia Legal Aid",u:"https://www.nslegalaid.ca",d:L("Family and criminal legal aid across Nova Scotia.")},
+ {p:"NS",k:"info",n:"Legal Information Society of Nova Scotia",u:"https://www.legalinfo.org",d:L("Free legal information line, lawyer referral and plain-language guides.")},
+ {p:"NS",k:"law",n:"Nova Scotia Courts",u:"https://www.courts.ns.ca",d:L("Forms, rules and self-help material.")},
+ {p:"NB",k:"info",n:"PLEIS-NB (Public Legal Education and Information Service)",u:"https://www.legal-info-legale.nb.ca",d:L("Plain-language guides, including family law and going to court in New Brunswick.")},
+ {p:"NU",k:"law",n:"Nunavut Court of Justice",u:"https://www.nunavutcourts.ca",d:L("Single-level trial court for Nunavut. Forms and court information.")}
+];
+
+const ROLES={start:L("I want to start a case"),respond:L("Someone started a case against me"),appeal:L("A decision was made and I disagree with it"),unsure:L("I'm not sure yet")};
+const ROLE_TIP={start:L("Because you are starting the case, you control the timing. Use that time to gather evidence and get advice before you file."),respond:L("Because someone else started the case, there is already a clock running. Find the date you were served and count your deadline in tab 3 today."),appeal:L("Because you want to challenge a decision, the deadline is usually very short. Count it in tab 3 before doing anything else."),unsure:L("If you are unsure, a legal aid intake worker, courtworker or legal information line can usually tell you in one call which forum applies.")};
+const URG={urgent:["urgent",L("Act fast")],watch:["watch",L("Watch the clock")],ok:["ok",L("Usually not rushed")]};
+
+const MATTERS={
+ child:{g:"all",label:L("Child protection (CFS / social services)"),urgency:"urgent",
+  forum:p=>L(`Usually provincial or territorial court (family division) or the ${sup(p)}. If the child is First Nations, Inuit or Métis, the federal Act respecting First Nations, Inuit and Métis children, youth and families also applies, and the child's Nation's own law may apply instead of provincial law.`),
+  steps:[L("Call legal aid the same day you are contacted. Child protection cases are a priority, and legal aid will often cover you."),L("Ask the agency in writing for everything it has about you and your child."),L("If your child is First Nations, Inuit or Métis, tell the agency which Nation or community they belong to, and ask a courtworker to come with you. The Indigenous governing body must be told about significant steps."),L("If you need an interpreter, ask for one now (see the Languages tab)."),L("Write down every visit, call and promise in your timeline (tab 3), with dates."),L("At the first hearing, you can ask for more time to get a lawyer. Ask for it, then follow up.")],
+  deadlines:[[L("Days"),L("Hearings move fast. Some first hearings take place within days of a child being taken into care.")],[L("Varies"),L("Each province sets its own time limits for temporary and permanent orders. Ask the court clerk for them.")]],
+  law:L("Your provincial child protection statute. For First Nations, Inuit and Métis children: An Act respecting First Nations, Inuit and Métis children, youth and families, S.C. 2019, c. 24 (upheld 2024 SCC 5), which puts best interests and cultural continuity first and sets an order of placement priority: with a parent, then extended family, then the community."),
+  kinds:["court","aid","info"]},
+ family:{g:"all",label:L("Separation, parenting, support"),urgency:"watch",
+  forum:p=>L(`Your province's family court or the ${sup(p)}. Divorce goes to the superior court.`),
+  steps:[L("Check whether your province requires a parenting course or mediation before you file."),L("Gather income proof (tax returns, pay stubs). Support is calculated from the Federal Child Support Guidelines tables."),L("If there is violence, ask about an emergency protection order. Safety comes first."),L("Use your province's family law information centre. Most have free self-help kits."),L("If the family home is on reserve, also open the \"Family home on reserve\" path.")],
+  deadlines:[[L("2 yrs"),L("Property division often has to be claimed within a set time after separation or divorce. It varies by province, so confirm.")]],
+  law:L("Divorce Act (federal); your provincial family law statute; Federal Child Support Guidelines."),
+  kinds:["aid","info","court"]},
+ housing:{g:"all",label:L("Housing or eviction"),urgency:"urgent",
+  forum:p=>L("Your provincial residential tenancy office or board. On reserve, band-owned housing may not fall under provincial tenancy law. A band council decision may instead be challenged by judicial review in the Federal Court."),
+  steps:[L("Read the notice carefully and write down the date you got it. Tenancy deadlines are often only days long."),L("Keep paying rent (or set it aside) if you can, and keep receipts."),L("File your dispute with the tenancy office inside the time limit."),L("For band housing on reserve, ask for the band's housing policy and appeal process in writing. Use the internal appeal first."),L("If the eviction may be discriminatory, a human rights complaint can run alongside.")],
+  deadlines:[[L("Days"),L("Provincial tenancy disputes often must be filed within 5 to 15 days of a notice.")],[L("30 days"),L("Federal Court judicial review of a band council decision.")]],
+  law:L("Your provincial residential tenancy statute. On reserve, the Federal Courts Act, s. 18.1, governs judicial review of band council decisions."),
+  kinds:["aid","info","body"]},
+ discrim:{g:"all",label:L("Discrimination (work, services, housing)"),urgency:"watch",
+  forum:p=>L(`With a federal department, First Nation government, bank, airline or telecom company: the Canadian Human Rights Commission. Otherwise: the ${p==="CA"?"provincial":T(PROV[p])} human rights commission or tribunal.`),
+  steps:[L("Work out who the other side is. This decides whether the matter is federal or provincial."),L("Write down what happened, who said what, witnesses, and how it affected you."),L("File the complaint inside the time limit, even if you are still collecting proof."),L("Ask about mediation. Many complaints settle at that stage.")],
+  deadlines:[[L("1 yr"),L("Usually one year from the last discriminatory act, federally and in most provinces. Check your province.")]],
+  law:L("Canadian Human Rights Act (federal); your provincial human rights code. In Quebec, the Charter of human rights and freedoms."),
+  kinds:["body","info","aid"]},
+ crown:{g:"all",label:L("Claim against government or police"),urgency:"watch",
+  forum:p=>L(`The ${sup(p)}, or small claims court for provincial matters. Federal Court or the superior court for claims against Canada.`),
+  steps:[L("Check whether you must give notice before you sue. Many Crown proceedings statutes require it, and the government defendant must be named correctly (in Saskatchewan, \"The Government of Saskatchewan\")."),L("Count your limitation period from the day you knew, or ought to have known, about the harm."),L("If the amount is small, small claims court is faster and simpler."),L("You can also complain to the Ombudsman or a police complaints body. That does not stop the clock on your lawsuit.")],
+  deadlines:[[L("2 yrs"),L("General limitation period in most provinces, counted from discovery (3 years in Quebec). Some claims have shorter periods.")],[L("Notice"),L("Pre-suit notice periods under Crown liability statutes can be short.")]],
+  law:L("Crown Liability and Proceedings Act (federal); your province's proceedings against the Crown statute; your province's Limitations Act."),
+  kinds:["law","aid","body"]},
+ debt:{g:"all",label:L("Being sued / debt / small claim"),urgency:"urgent",
+  forum:p=>L(`Small claims court (lower amounts) or the ${sup(p)}.`),
+  steps:[L("Note the date you were served. You usually have a short time to file a defence or reply."),L("File your defence or reply on time, even a short one. If you do not, the other side can get a default judgment without a hearing."),L("If you are a Status Indian, personal property situated on reserve is generally protected from seizure by non-Indigenous creditors (Indian Act s. 89). Raise this if it applies."),L("Propose settlement or a payment plan in writing.")],
+  deadlines:[[L("~20 days"),L("Typical time to file a defence after being served. It varies by province and court, so check the papers you got.")]],
+  law:L("Your province's small claims and civil procedure rules; for Status Indians, Indian Act s. 89."),
+  kinds:["aid","info","law"]},
+ appeal:{g:"all",label:L("Appealing a court decision"),urgency:"urgent",
+  forum:p=>p==="SK"?L("Court of Appeal for Saskatchewan, then the Supreme Court of Canada with leave."):L("Your province's Court of Appeal, then the Supreme Court of Canada with leave."),
+  steps:[L("Find the exact date the decision was made (pronounced). Deadlines usually run from then, not from the date the written order was signed."),L("Check whether you need leave (permission) first. Leave has its own, shorter clock."),L("Order the transcript of the hearing early. It takes weeks."),L("Ask for a stay separately if you need the decision paused. Filing an appeal does not always stop it."),L("An appeal is not a new trial. You must show the judge made a legal error or a clear factual error.")],
+  deadlines:p=>p==="SK"?[[L("30 days"),L("Notice of appeal, Court of Appeal for Saskatchewan (civil), from the date of decision.")],[L("15 days"),L("Application for leave to appeal, where leave is required.")],[L("60 days"),L("Leave to appeal to the Supreme Court of Canada, from the date of the Court of Appeal judgment. July is not counted.")]]:[[L("~30 days"),L("Typical notice of appeal period. Check your province's appeal rules.")],[L("60 days"),L("Leave to appeal to the Supreme Court of Canada (July not counted).")]],
+  law:L("Your province's Court of Appeal Act and rules; Supreme Court Act, s. 58."),
+  kinds:["law","aid","info"]},
+ band:{g:"ind",label:L("Band council or election decision"),urgency:"urgent",
+  forum:()=>L("Federal Court (judicial review). Courts treat band councils as \"federal boards\" when they make decisions under the Indian Act or a custom code. Your community may also have an election appeal board you must use first."),
+  steps:[L("Get a copy of the decision and the date you were told about it. The 30-day clock starts there."),L("Use any internal appeal (election appeal board, custom code tribunal) first. A court may refuse to hear you if you skip it."),L("Gather the band's own rules: custom election code, membership code, policies."),L("File a Notice of Application in the Federal Court. Its website has fillable forms and a self-represented guide."),L("Judicial review asks whether the decision was reasonable and fairly made. It is not a new hearing on the facts.")],
+  deadlines:[[L("30 days"),L("From the day the decision was first communicated to you (Federal Courts Act s. 18.1(2)). You can ask for an extension, but you must explain the delay.")]],
+  law:L("Federal Courts Act, R.S.C. 1985, c. F-7, ss. 2, 18, 18.1; Federal Courts Rules, Part 5."),
+  kinds:["law","aid","body"]},
+ home:{g:"ind",label:L("Family home on reserve"),urgency:"watch",
+  forum:p=>L(`The ${sup(p)} (or your province's family court), applying FHRMIRA or your First Nation's own matrimonial property law instead of the provincial property law.`),
+  steps:[L("Find out whether your First Nation has its own matrimonial real property law. Ask the band office. If it does not, the Provisional Federal Rules apply."),L("Gather proof of the home: Certificate of Possession, band housing allocation letters, and who paid for what."),L("If there is violence, ask about an emergency protection order or exclusive occupation order. FHRMIRA provides both."),L("Deal with parenting and support separately, because provincial family law still covers those (see the \"Separation, parenting, support\" path)."),L("Try a written agreement first. A court can enforce a fair agreement about the home.")],
+  deadlines:[[L("Check"),L("Some claims after a spouse's death must be made within set time limits under FHRMIRA.")]],
+  law:L("Family Homes on Reserves and Matrimonial Interests or Rights Act, S.C. 2013, c. 20. It applies where at least one partner is a First Nation member or Status Indian."),
+  kinds:["court","aid","info"]},
+ estate:{g:"ind",label:L("Wills and estates on reserve"),urgency:"ok",
+  forum:p=>L(`For a Status person who ordinarily lived on reserve, Indigenous Services Canada (ISC) estates services, not provincial probate court. Otherwise, the provincial probate process in the ${sup(p)} applies.`),
+  steps:[L("Confirm where the person ordinarily lived at death. This decides which system applies."),L("Contact ISC estates services and send the death certificate and any will."),L("Under the Indian Act, a will has no legal effect until the Minister approves it. The Minister also appoints the administrator."),L("If you disagree with a decision by the Minister, ask the Federal Court for judicial review within 30 days of the decision."),L("Know that Certificate of Possession land can only pass to someone entitled to live on that reserve.")],
+  deadlines:[[L("30 days"),L("Federal Court judicial review of a Minister's decision on an estate.")]],
+  law:L("Indian Act, R.S.C. 1985, c. I-5, ss. 42–50.1, and the Indian Estates Regulations."),
+  kinds:["info","law","aid"]},
+ status:{g:"ind",label:L("Status / registration / membership"),urgency:"watch",
+  forum:()=>L("The Indian Registrar (ISC), then a protest, then an appeal to court. Band membership under a band-controlled code goes through the band's own process."),
+  steps:[L("Apply, or ask why you were refused, in writing to ISC."),L("If the Registrar refuses or removes you, file a protest under s. 14.2 of the Indian Act."),L("If the protest decision is against you, you can appeal it to your province's superior court under s. 14.3."),L("Gather family records: birth, marriage and death certificates, band lists, and church or residential school records.")],
+  deadlines:[[L("3 yrs"),L("Protest of a Registrar's decision to add, remove, or not add a name (Indian Act s. 14.2).")],[L("6 mo"),L("Appeal of a protest decision to court (s. 14.3). Confirm the current deadline before relying on it.")]],
+  law:L("Indian Act, ss. 5–14.3. The rules have changed several times (Bills C-31, C-3, S-3), so older refusals may be worth asking about again."),
+  kinds:["info","law","aid"]},
+ treaty:{g:"ind",label:L("Treaty, land, hunting or duty to consult"),urgency:"watch",
+  forum:p=>L(`Usually the ${sup(p)} or the Federal Court. If you were charged with a hunting or fishing offence, you raise the right as a defence to that charge. Historic claims about reserve land or money are brought by the Nation to the Specific Claims Tribunal.`),
+  steps:[L("Work out whether this is your personal right or your Nation's collective right. Most treaty and title rights are held by the community, so the Nation usually has to be part of the case."),L("Speak with your Chief and Council or Métis local early. Consultation is owed to the rights-holding group."),L("Gather proof of the practice: Elders' evidence, maps, harvest records, family history."),L("Read Sparrow, Haida Nation and Restoule in tab 4. They set the tests the court will use."),L("These cases are complex and expensive. Ask about a lawyer, test-case funding, or an intervener.")],
+  deadlines:[[L("Varies"),L("Challenges to government approvals are often judicial reviews (30 days federally, varies provincially).")]],
+  law:L("Constitution Act, 1982, s. 35; Charter s. 25; the treaty text and the oral promises recorded around it."),
+  kinds:["law","info","aid"]}
+};
+
+const PHASES=[
+ {t:L("Before you file anything"),items:[
+  [L("Name the problem in one sentence"),L("What happened, who did it, and what you want the court to order. If you cannot say it in a sentence yet, keep working on it.")],
+  [L("Confirm the right court or tribunal"),L("Use tab 1. Ask the registry clerk too. Clerks cannot give advice, but they can tell you which court handles what.")],
+  [L("Count your deadline"),L("Use tab 3. Write it on paper somewhere you will see it every day.")],
+  [L("Get free advice at least once"),L("A courtworker, legal aid intake, or a pro bono clinic. Even a 30-minute review can catch a fatal mistake.")],
+  [L("Gather your documents"),L("Letters, emails, texts, photos, decisions, receipts. Keep originals safe. Work from copies.")],
+  [L("Build your timeline"),L("Date, what happened, and what proves it (tab 3).")]]},
+ {t:L("Starting or answering the case"),items:[
+  [L("Use the court's official form"),L("Get the current form from the court website. An old form can get your papers rejected.")],
+  [L("Name the parties correctly"),L("This is called the style of cause. Use exact legal names. Suing a government has special naming rules.")],
+  [L("Ask the registry about filing"),L("Ask about e-filing, fees, and fee waivers if you cannot afford them.")],
+  [L("Serve the other side properly"),L("Delivering your papers to the other party is called service. Follow the rule exactly and keep proof (an affidavit of service).")],
+  [L("Ask for accommodations in writing"),L("For example: an interpreter in any language, an Elder or support person, smudging or an eagle feather oath, disability needs, or remote attendance. Ask early and keep a copy.")]]},
+ {t:L("Getting ready for the hearing"),items:[
+  [L("Read the rules for your type of hearing"),L("Chambers application, trial, and judicial review each work differently.")],
+  [L("Write your affidavit"),L("Facts only, numbered, one fact per paragraph, with exhibits labelled A, B, C.")],
+  [L("Find 2 to 5 cases that support you"),L("Use tab 4. Choose cases from your province and from the Supreme Court of Canada.")],
+  [L("Write a short argument"),L("Covering what you want, the law that allows it, how your facts fit, and why the other side's position is weaker. Check the page limits.")],
+  [L("Prepare your binder"),L("See the binder order below. Make copies if the court asks for them.")],
+  [L("Practise out loud"),L("Explain your case in 5 minutes to someone you trust. Judges appreciate short, organized answers.")],
+  [L("Plan the day"),L("Transport, childcare, time off, arriving 30 minutes early, and the courtroom number.")]]},
+ {t:L("On the day"),items:[
+  [L("Check in with the clerk"),L("Say you are self-represented. Ask where to sit.")],
+  [L("Address the judge correctly"),L("\"Justice [Name]\" or \"Your Honour\" depending on the court. Ask the clerk. Stand when the judge enters and when you speak.")],
+  [L("Speak to the judge, not the other side"),L("Stay calm if the other side says something untrue. You will get your turn.")],
+  [L("Write down what the judge orders"),L("The exact words and any dates. Ask the clerk how to get a copy of the order.")],
+  [L("It is okay to ask"),L("If you do not understand, say so: \"I am self-represented. Could you explain what I need to do next?\" Judges are expected to help self-represented people understand the process (Pintea v Johns, 2017 SCC 23).")]]},
+ {t:L("After the decision"),items:[
+  [L("Get the written decision and order"),L("Read them with a courtworker, clinic or legal information line.")],
+  [L("Count the appeal deadline immediately"),L("It usually runs from the date the decision was made, not when you got the paperwork.")],
+  [L("Do what the order says, by its dates"),L("Ignoring an order can lead to contempt, even if you plan to appeal.")],
+  [L("Look after yourself"),L("Court is hard on the body and spirit. Call or text 9-8-8, an Elder, or someone you trust.")]]}
+];
+const BINDER=[L("Index (a list of everything in the binder, with tab numbers)"),L("Court orders and notices already issued"),L("Your filed documents (claim / application / reply)"),L("The other side's filed documents"),L("Affidavits (yours first, then theirs) with exhibits"),L("Your timeline (one page)"),L("Your written argument"),L("Cases and laws you rely on (relevant paragraphs highlighted)"),L("Notes pad: questions, and space to write the judge's orders")];
+
+const DL=[
+ {id:"skca",l:L("Saskatchewan Court of Appeal: notice of appeal (civil)"),days:30,note:L("The Court of Appeal Act, 2000, s. 12(2). Counted from the date of the decision.")},
+ {id:"skleave",l:L("Saskatchewan Court of Appeal: leave to appeal"),days:15,note:L("Where leave is required (s. 12(3)). A separate, shorter clock than the appeal itself.")},
+ {id:"scc",l:L("Supreme Court of Canada: leave to appeal"),days:60,julyOff:true,note:L("Supreme Court Act s. 58(1)(a), from the date the Court of Appeal judgment was pronounced. July is not counted (s. 58(2)).")},
+ {id:"fc",l:L("Federal Court: judicial review (federal decision or band council)"),days:30,note:L("Federal Courts Act s. 18.1(2), from when the decision was first communicated to you.")},
+ {id:"hr",l:L("Human rights complaint (federal and most provinces)"),years:1,note:L("Usually one year from the last act of discrimination. Confirm with the commission.")},
+ {id:"lim",l:L("General limitation period to sue (most provinces)"),years:2,note:L("Two years from discovery in most provinces, including Saskatchewan, Alberta, BC and Ontario. Quebec uses three years (Civil Code art. 2925). Some claims have shorter periods.")},
+ {id:"status",i:1,l:L("Indian Act registration protest"),years:3,note:L("Indian Act s. 14.2(2), counted from the decision about the Register.")},
+ {id:"custom",l:L("Other (enter the number of days)"),days:null,note:L("Use this when your court papers or a rule give you a number of days.")}
+];
+
+const CASES=[
+ {s:"self",n:"Pintea v Johns",c:"2017 SCC 23",w:L("Applies to everyone who represents themselves. Endorses the Canadian Judicial Council's Statement of Principles on Self-represented Litigants: judges must take steps so self-reps understand the process.")},
+ {s:"rights",n:"R v Sparrow",c:"[1990] 1 SCR 1075",w:L("First major s. 35 case. Sets the test for when government can justify limiting an Aboriginal right.")},
+ {s:"rights",n:"R v Van der Peet",c:"[1996] 2 SCR 507",w:L("Test for proving an Aboriginal right: a practice integral to the group's distinctive culture before contact.")},
+ {s:"rights",n:"R v Powley",c:"2003 SCC 43",w:L("How Métis communities prove s. 35 rights (before effective European control).")},
+ {s:"land",n:"Delgamuukw v British Columbia",c:"[1997] 3 SCR 1010",w:L("Defines Aboriginal title. Confirms oral histories are admissible evidence and must be given proper weight.")},
+ {s:"land",n:"Tsilhqot'in Nation v British Columbia",c:"2014 SCC 44",w:L("First declaration of Aboriginal title in Canada. Explains the occupation test.")},
+ {s:"consult",n:"Haida Nation v British Columbia",c:"2004 SCC 73",w:L("The Crown must consult, and sometimes accommodate, before acting in ways that may affect rights, even before those rights are proven.")},
+ {s:"consult",n:"Mikisew Cree First Nation v Canada",c:"2005 SCC 69",w:L("The duty to consult applies to treaty rights.")},
+ {s:"consult",n:"Clyde River (Hamlet) v Petroleum Geo-Services",c:"2017 SCC 40",w:L("Consultation done through a regulator must still be meaningful.")},
+ {s:"treaty",n:"Manitoba Metis Federation v Canada",c:"2013 SCC 14",w:L("The honour of the Crown requires diligent implementation of constitutional promises to Métis people.")},
+ {s:"treaty",n:"Ontario (AG) v Restoule",c:"2024 SCC 27",w:L("Treaty promises are enforceable. The Crown breached the Robinson Treaties' annuity promise.")},
+ {s:"treaty",n:"Quebec (AG) v Pekuakamiulnuatsh Takuhikan",c:"2024 SCC 39",w:L("The honour of the Crown applies to agreements with Indigenous communities. The Crown must negotiate and perform them honourably.")},
+ {s:"rights",n:"R v Desautel",c:"2021 SCC 17",w:L("Indigenous peoples now living outside Canada can still hold s. 35 rights in their traditional territory in Canada.")},
+ {s:"rights",n:"Dickson v Vuntut Gwitchin First Nation",c:"2024 SCC 10",w:L("Leading case on Charter s. 25: it can shield collective Indigenous rights and practices from individual Charter claims.")},
+ {s:"family",n:"Reference re An Act respecting First Nations, Inuit and Métis children, youth and families",c:"2024 SCC 5",w:L("Upholds the federal child welfare law. Indigenous child and family laws can have the force of federal law.")},
+ {s:"family",n:"Daniels v Canada",c:"2016 SCC 12",w:L("Métis and non-status Indians are \"Indians\" under s. 91(24) of the Constitution Act, 1867, so Ottawa has jurisdiction over them.")}
+];
+const CSUB={all:L("All"),self:L("Everyone (self-reps)"),rights:L("Aboriginal rights"),land:L("Title & land"),consult:L("Duty to consult"),treaty:L("Treaty & honour of the Crown"),family:L("Family & jurisdiction")};
+
+const TOPICS=[
+ {i:0,t:L("Your right to fair treatment as a self-represented person"),b:L("<p>Judges must make sure that a person without a lawyer understands the process and can present their case. This includes explaining procedure, allowing reasonable flexibility on form, and not penalizing honest mistakes (<i>Pintea v Johns</i>, 2017 SCC 23). It does not mean the judge will argue your case or relax the law itself. You can politely refer to these principles if you feel lost.</p>")},
+ {i:0,t:L("Interpreters and language rights"),b:L("<p>The Charter (s. 14) guarantees an interpreter to a party or witness who does not understand or speak the language of the proceedings, or who is deaf. Criminal cases and federal courts can be heard in English or French. Civil and family courts arrange interpreters under their own rules, sometimes at no cost. Ask the registry in writing as early as possible. The Languages tab has a ready-to-send letter.</p>")},
+ {i:0,t:L("Discrimination and human rights"),b:L("<p>Everyone in Canada is protected from discrimination in work, housing and services based on grounds such as race, national or ethnic origin, colour, religion, sex, sexual orientation, gender identity, age, disability and family status. Human rights commissions and tribunals are usually faster and cheaper than court, and you do not need a lawyer. Watch the time limit, which is usually one year.</p>")},
+ {i:0,t:L("Newcomers and immigration status"),b:L("<p>Courts are open to everyone, whatever their immigration status, and you can bring or defend a civil or family case. Immigration and refugee decisions, though, go to the Immigration and Refugee Board and the Federal Court, which have very short deadlines (often 15 days to seek leave for judicial review of a decision made in Canada). If a criminal or family matter could affect your status, get legal advice before you agree to anything.</p>")},
+ {i:1,t:L("Section 35: Aboriginal and treaty rights"),b:L("<p>Section 35 of the <i>Constitution Act, 1982</i> \"recognizes and affirms\" the existing Aboriginal and treaty rights of the Indian, Inuit and Métis peoples. It sits outside the Charter, so the government cannot rely on the Charter's s. 1 \"reasonable limits\" clause. Instead, it must justify any infringement under the <i>Sparrow</i> test.</p><p><b>Use it carefully.</b> Most s. 35 rights belong to the community, not one person. Not every Indigenous person's case is a s. 35 case. Often the stronger argument is fairness, a contract, or discrimination.</p>")},
+ {i:1,t:L("Charter section 25: the shield"),b:L("<p>Section 25 says Charter rights cannot be read in a way that cancels or reduces Aboriginal, treaty or other rights. It is a shield, not a sword. It protects Indigenous rights and collective practices when someone uses another Charter right against them (<i>Dickson v Vuntut Gwitchin</i>, 2024 SCC 10).</p>")},
+ {i:1,t:L("Duty to consult"),b:L("<p>When government knows of a possible right and plans something that may harm it, it must consult. The deeper the impact and the stronger the claim, the more consultation is owed (<i>Haida Nation</i>). The duty is owed to the rights-holding community, so individuals usually raise it through their Nation.</p>")},
+ {i:1,t:L("Indigenous child and family services"),b:L("<p>The federal <i>Act respecting First Nations, Inuit and Métis children, youth and families</i> (upheld 2024 SCC 5) requires that a child's best interests include cultural, linguistic and community connection, that preventive care be preferred, and that placement priority go to parents, then extended family, then the community. Where an Indigenous governing body has passed its own law, that law can prevail over provincial law.</p>")},
+ {i:1,t:L("The family home on reserve (FHRMIRA)"),b:L("<p>Provincial family property law cannot divide reserve land. FHRMIRA fills that gap. Your First Nation's own law applies if it has one. Otherwise the Provisional Federal Rules apply, with emergency protection orders, exclusive occupation orders, and division of the value of interests.</p>")},
+ {i:1,t:L("Wills and estates on reserve"),b:L("<p>For Status people who ordinarily lived on reserve, the <i>Indian Act</i> (ss. 42–50.1) gives Indigenous Services Canada control of the estate. A will must be approved by the Minister. Without a will, the Indian Act's own rules decide who inherits.</p>")},
+ {i:1,t:L("Band council decisions"),b:L("<p>Band councils must follow their own codes and treat people fairly. Decisions about housing, membership, elections and programs can be challenged by judicial review in the Federal Court, usually within 30 days, after any internal appeal.</p>")},
+ {i:1,t:L("Ceremony and Indigenous courts"),b:L("<p>Many courts allow an Elder or support person to sit with you, an eagle feather oath, or smudging. Some hold Indigenous court circuits, such as Cree Court in Saskatchewan and Indigenous Peoples' Courts elsewhere. Ask the registry in writing well before your hearing.</p>")}
+];
+
+const GL=[
+ [L("Affidavit"),L("Your evidence written down in numbered paragraphs and sworn or affirmed to be true in front of a commissioner for oaths. Lying in one is a crime.")],
+ [L("Affirm"),L("To promise to tell the truth without a religious oath. It has the same legal effect as swearing.")],
+ [L("Applicant / Respondent"),L("The person who brings an application, and the person answering it.")],
+ [L("Plaintiff / Defendant"),L("The person who sues, and the person being sued.")],
+ [L("Chambers"),L("A hearing in front of one judge, usually on an application rather than a full trial. Often short, and based on affidavits.")],
+ [L("Commissioner for oaths"),L("A person allowed to witness affidavits.")],
+ [L("Default judgment"),L("A decision against you because you did not respond on time. It can sometimes be set aside if you act quickly.")],
+ [L("Exhibit"),L("A document attached to an affidavit and labelled A, B, C.")],
+ [L("Factum / Brief"),L("Your written argument, setting out the facts, the issues, the law and what you want.")],
+ [L("Forum"),L("The court or tribunal that has the power to decide your issue.")],
+ [L("Interpreter"),L("A person who translates spoken words in court. The Charter guarantees one to a party or witness who needs it.")],
+ [L("Judicial review"),L("Asking a court to check whether a government body or band council made its decision lawfully, reasonably and fairly. It does not re-hear the case.")],
+ [L("Jurisdiction"),L("The legal power of a court to hear a matter, or of a government to make a law about it.")],
+ [L("Leave"),L("Permission from a court to take a step, such as leave to appeal.")],
+ [L("Limitation period"),L("The deadline to start a lawsuit. If you miss it, your claim can be lost forever.")],
+ [L("Neutral citation"),L("The standard way to name a decision: year, court code, number (e.g. 2014 SCC 44).")],
+ [L("Order"),L("What the judge actually tells people to do. It is different from the reasons, which explain why.")],
+ [L("Registry"),L("The court office where you file papers and get dates. Staff can explain process but cannot give legal advice.")],
+ [L("Service"),L("Formally delivering court papers to the other side, following the rules. Keep proof.")],
+ [L("Stay"),L("An order pausing a decision or a proceeding.")],
+ [L("Style of cause"),L("The title of the case: the names of the parties at the top of every document.")],
+ [L("Honour of the Crown"),L("The principle that government must act honourably and with integrity in all dealings with Indigenous peoples.")],
+ [L("Fiduciary duty"),L("A duty to act in another's best interest. The Crown owes it to First Nations in some dealings.")],
+ [L("Gladue"),L("Principles requiring courts to consider the background of Indigenous people, from R v Gladue. Mainly used in criminal sentencing.")]
+];
+
+const LANGS=[
+ {n:"Nēhiyawēwin · ᓀᐦᐃᔭᐍᐏᐣ",e:L("Cree"),w:L("Spoken across the Prairies, northern Ontario and Quebec. Major dialects include Plains (y), Woods (th), Swampy (n), Moose and East Cree. Written in syllabics and in Standard Roman Orthography."),now:[L("Hope for Wellness Help Line (1-855-242-3310): counselling in Cree on request."),L("Saskatchewan's Provincial Court has held a Cree Court circuit. Ask the registry whether it serves your area."),L("Many courtworkers in Cree communities speak Cree. Ask when you call.")]},
+ {n:"Anishinaabemowin",e:L("Ojibwe / Saulteaux / Oji-Cree"),w:L("Spoken from Quebec to Saskatchewan. It includes Saulteaux (Plains Ojibwe), Odawa, Algonquin and, closely related, Oji-Cree (Anishininiimowin). Written in Roman orthography (often the double-vowel system) and in syllabics in the north."),now:[L("Hope for Wellness Help Line (1-855-242-3310): counselling in Ojibwe on request."),L("Nishnawbe-Aski Legal Services (1-800-465-5581) serves NAN communities and their languages.")]},
+ {n:"Dene",e:L("Dene languages (Dëne Sųłıné, Tłı̨chǫ, South & North Slavey, Gwich'in and others)"),w:L("A family of related but distinct languages across northern Saskatchewan, Alberta, BC, Manitoba and the NWT, where several are official languages. Each needs its own translation."),now:[L("In the Northwest Territories, several Dene languages are official languages. Ask the court registry for an interpreter."),L("Ask your local courtworker agency whether a Dene-speaking worker is available.")]},
+ {n:"Inuktitut · ᐃᓄᒃᑎᑐᑦ",e:L("Inuktitut / Inuinnaqtun"),w:L("Spoken across Inuit Nunangat. Written in syllabics in most of Nunavut and Nunavik, and in Roman orthography for Inuinnaqtun and in Labrador (Inuttitut)."),now:[L("The Nunavut Court of Justice routinely works with Inuktitut and Inuinnaqtun interpreters."),L("Hope for Wellness Help Line (1-855-242-3310): counselling in Inuktitut on request.")]},
+ {n:"Michif",e:L("Michif (Métis)"),w:L("The Métis language, which joins Cree and French. It is spoken mainly in the Prairies."),now:[L("Ask your provincial Métis government or local about community language support.")]}
+];
+
+/* ================= Rendering ================= */
+const tabs=[...document.querySelectorAll('nav.tabs button')];
+function showTab(id,push){tabs.forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===id?"true":"false"));document.querySelectorAll("section.panel").forEach(s=>s.hidden=s.id!=="tab-"+id);store.set("tab",id);if(push)window.scrollTo({top:0})}
+tabs.forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab,true)));
+document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g)showTab(g.dataset.go,true)});
+
+const provOpts=()=>Object.entries(PROV).map(([k,v])=>`<option value="${k}">${esc(T(v))}</option>`).join("");
+const indPill=()=>`<span class="pill ind">${esc(T(S.fnmi))}</span>`;
+function resHTML(r){return `<div class="res"><div class="meta"><span class="pill kind">${esc(T(KINDS[r.k]))}</span><span class="pill kind">${esc(r.p==="CA"?T(S.national):T(PROV[r.p]))}</span>${r.i?indPill():""}</div>${link(r.u,r.n)}<p>${esc(T(r.d))}</p></div>`}
+function copyFrom(btn,box,msg){btn.addEventListener("click",()=>{const txt=box.textContent;const ok=()=>msg.textContent=T(S.copied);
+  const fb=()=>{const r=document.createRange();r.selectNodeContents(box);const s=getSelection();s.removeAllRanges();s.addRange(r);msg.textContent=T(S.selected)};
+  try{navigator.clipboard.writeText(txt).then(ok,fb)}catch(e){fb()}})}
+
+/* Pathfinder */
+const pfProv=$("#pf-prov"),pfRole=$("#pf-role"),pfM=$("#pf-matter");
+let pf=store.get("pf",{prov:"SK",role:"start",m:"housing"});if(!MATTERS[pf.m])pf.m="housing";
+pfM.addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(!b)return;pf.m=b.dataset.m;renderPF()});
+pfProv.addEventListener("change",()=>{pf.prov=pfProv.value;renderPF()});
+pfRole.addEventListener("change",()=>{pf.role=pfRole.value;renderPF()});
+function resFor(p,kinds,ind){return DIR.filter(r=>(r.p===p||r.p==="CA")&&kinds.includes(r.k)&&(ind||!r.i||r.k==="court")).sort((a,b)=>(a.p==="CA")-(b.p==="CA")).slice(0,6)}
+function renderPFControls(){
+  pfProv.innerHTML=provOpts();pfProv.value=pf.prov;
+  pfRole.innerHTML=Object.entries(ROLES).map(([k,v])=>`<option value="${k}">${esc(T(v))}</option>`).join("");pfRole.value=pf.role;
+  const grp=g=>Object.entries(MATTERS).filter(([,m])=>m.g===g).map(([k,m])=>`<button class="chip" data-m="${k}" aria-pressed="false">${esc(T(m.label))}</button>`).join("");
+  pfM.innerHTML=`<div class="chipgroup"><small>${esc(T(S.grp_all))}</small><div class="chips">${grp("all")}</div></div><div class="chipgroup"><small>${esc(T(S.grp_ind))}</small><div class="chips">${grp("ind")}</div></div>`;
+}
+function renderPF(){
+  store.set("pf",pf);
+  pfM.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.m===pf.m?"true":"false"));
+  const m=MATTERS[pf.m],p=pf.prov,u=URG[m.urgency];
+  const dls=typeof m.deadlines==="function"?m.deadlines(p):m.deadlines;const cs=COURTSITE[p];
+  $("#pf-out").innerHTML=`
+   <div class="route-head"><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill ${u[0]}">${esc(T(u[1]))}</span><span class="pill kind">${esc(T(PROV[p]))}</span>${m.g==="ind"?indPill():""}</div>
+     <h3>${esc(T(m.label))}</h3><p class="forum"><b>${esc(T(S.forum_l))}</b> ${esc(T(m.forum(p)))}</p></div>
+   <div class="card"><b>${esc(T(ROLE_TIP[pf.role]))}</b></div>
+   <div class="grid2">
+     <div class="card"><h3>${esc(T(S.first))}</h3><ol class="steps">${m.steps.map(s=>`<li><div>${esc(T(s))}</div></li>`).join("")}</ol></div>
+     <div style="display:grid;gap:16px;align-content:start">
+       <div class="card"><h3>${esc(T(S.dls))}</h3><div class="deadline">${dls.map(([a,b])=>`<b>${esc(T(a))}</b><span>${esc(T(b))}</span>`).join("")}</div>
+         <p style="font-size:.9rem;color:var(--muted)">${esc(T(S.dls_note))} <button class="ghost" data-go="file">${esc(T(S.count_btn))}</button></p></div>
+       <div class="card"><h3>${esc(T(S.lawgov))}</h3><p>${esc(T(m.law))}</p>${cs?`<p style="font-size:.95rem">${esc(T(S.rules_forms))} ${link(cs)}</p>`:""}</div>
+     </div>
+   </div>
+   <div><h3 style="margin-bottom:10px">${esc(T(S.whohelp))}</h3><div class="res-list">${resFor(p,m.kinds,m.g==="ind"||pf.m==="child").map(resHTML).join("")}</div></div>`;
+}
+
+/* Prepare */
+let ticks=store.get("ticks",{});
+function renderPrep(){
+  const open=[...document.querySelectorAll(".phase")].map(d=>d.open);
+  let total=0,done=0;
+  $("#prep-phases").innerHTML=PHASES.map((ph,i)=>{const n=ph.items.length,d=ph.items.filter((_,j)=>ticks[i+"-"+j]).length;total+=n;done+=d;
+    return `<details class="phase" ${(open.length?open[i]:i===0)?"open":""}><summary><span>${esc(T(ph.t))}</span><span class="count">${d} ${esc(T(S.of))} ${n}</span></summary><div class="body">${ph.items.map((it,j)=>`<div class="check"><input type="checkbox" id="ck-${i}-${j}" data-k="${i}-${j}" ${ticks[i+"-"+j]?"checked":""}><label for="ck-${i}-${j}"><b>${esc(T(it[0]))}</b><small>${esc(T(it[1]))}</small></label></div>`).join("")}</div></details>`}).join("");
+  $("#prep-total").textContent=`${done} ${T(S.of)} ${total} ${T(S.done)}`;$("#prep-bar").style.width=(total?done/total*100:0)+"%";
+  $("#binder").innerHTML=BINDER.map(b=>`<li><div>${esc(T(b))}</div></li>`).join("");
+}
+$("#prep-phases").addEventListener("change",e=>{const k=e.target.dataset.k;if(!k)return;ticks[k]=e.target.checked;store.set("ticks",ticks);renderPrep();const el=document.getElementById("ck-"+k);if(el)el.focus()});
+
+/* Deadlines */
+const dlT=$("#dl-type"),dlD=$("#dl-date"),dlC=$("#dl-custom");
+const dls0=store.get("dl",{t:"fc",d:"",c:30});dlC.value=dls0.c;dlD.value=dls0.d||new Date().toISOString().slice(0,10);
+function addDays(dt,n,julyOff){const d=new Date(dt);let left=n;while(left>0){d.setDate(d.getDate()+1);if(julyOff&&d.getMonth()===6)continue;left--}return d}
+function renderDLControls(){const cur=dlT.value||dls0.t;dlT.innerHTML=DL.map(d=>`<option value="${d.id}">${esc(T(d.l))}${d.i?" ("+esc(T(S.fnmi))+")":""}</option>`).join("");dlT.value=cur}
+function renderDL(){
+  const t=DL.find(x=>x.id===dlT.value)||DL[3];$("#dl-custom-wrap").hidden=t.id!=="custom";
+  store.set("dl",{t:dlT.value,d:dlD.value,c:dlC.value});
+  if(!dlD.value){$("#dl-out").innerHTML="";return}
+  const [y,mo,da]=dlD.value.split("-").map(Number);const start=new Date(y,mo-1,da);
+  let due;if(t.years){due=new Date(start);due.setFullYear(due.getFullYear()+t.years)}else due=addDays(start,t.id==="custom"?Math.max(1,+dlC.value||1):t.days,t.julyOff);
+  const today=new Date();today.setHours(0,0,0,0);const left=Math.round((due-today)/864e5);const wk=due.getDay()===0||due.getDay()===6;
+  const f=due.toLocaleDateString("en-CA",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  $("#dl-out").innerHTML=`<div class="result ${left<=7?"alert":""}">${esc(T(S.due))} ${esc(f)}<br><span style="font-weight:400">${esc(left<0?T(S.passed)(-left):left===0?T(S.today):T(S.left)(left))}${wk?esc(T(S.weekend)):""}</span></div>`;
+  $("#dl-note").textContent=T(t.note)+T(S.estimate);
+}
+[dlT,dlD,dlC].forEach(el=>el.addEventListener("input",renderDL));
+
+/* Timeline + affidavit */
+const SAMPLE=[{d:"2026-08-14",t:L("Landlord told me in person I had to move out by the end of the month. No written notice given.")},{d:"2026-08-20",t:L("Received a written eviction notice under my door (Exhibit A).")},{d:"2026-08-27",t:L("Asked the landlord in writing for the reason for the eviction (Exhibit B). No reply.")}];
+let events=store.get("events",null);let isSample=false;if(!events||!events.length){events=SAMPLE.slice();isSample=true}
+const afName=$("#af-name"),afPlace=$("#af-place");afName.value=store.get("afn","");afPlace.value=store.get("afp","");
+function renderEv(){
+  events.sort((a,b)=>a.d.localeCompare(b.d));$("#ev-flag").hidden=!isSample;
+  $("#ev-text").placeholder=T(S.ev_ph);afName.placeholder="e.g. Mary Bird";afPlace.placeholder="e.g. Prince Albert, Saskatchewan";
+  $("#ev-list").innerHTML=events.length?events.map((e,i)=>`<div class="event"><time>${esc(e.d)}</time><p>${esc(T(e.t))}</p><button class="ghost" data-del="${i}">${esc(T(S.remove))}</button></div>`).join(""):`<p class="empty">${esc(T(S.ev_empty))}</p>`;
+  const nm=afName.value.trim()||"[YOUR FULL NAME]",pl=afPlace.value.trim()||"[COMMUNITY / CITY, PROVINCE]";
+  const dfmt=d=>new Date(d+"T12:00").toLocaleDateString("en-CA",{year:"numeric",month:"long",day:"numeric"});
+  const lc=s=>s.charAt(0).toLowerCase()+s.slice(1);
+  const paras=["I am the [applicant / respondent / plaintiff / defendant] in this matter and have personal knowledge of the facts set out in this affidavit, except where stated to be based on information and belief, in which case I believe them to be true."]
+    .concat(events.map(e=>`On ${dfmt(e.d)}, `+lc(T(e.t))));
+  paras.push("I make this affidavit in support of [what you are asking the court for] and for no improper purpose.");
+  $("#af-out").textContent=`AFFIDAVIT OF ${nm.toUpperCase()}\n\nI, ${nm}, of ${pl}, MAKE OATH (or AFFIRM) AND SAY THAT:\n\n`+paras.map((p,i)=>`${i+1}. ${p}`).join("\n\n")+`\n\nSWORN (or AFFIRMED) before me at ____________, on ____________, 20__.\n\n_______________________          _______________________\nCommissioner for Oaths            ${nm}`+(isSample?"\n\n[Built from EXAMPLE timeline entries. Replace them with your own.]":"");
+}
+$("#ev-add").addEventListener("click",()=>{const d=$("#ev-date").value,t=$("#ev-text").value.trim();if(!d||!t){$("#ev-text").placeholder=T(S.ev_need);return}
+  if(isSample){events=[];isSample=false}events.push({d,t});store.set("events",events);$("#ev-text").value="";renderEv()});
+$("#ev-list").addEventListener("click",e=>{const b=e.target.closest("[data-del]");if(!b)return;if(isSample){events=[];isSample=false}else events.splice(+b.dataset.del,1);store.set("events",events);renderEv()});
+[afName,afPlace].forEach(el=>el.addEventListener("input",()=>{store.set("afn",afName.value);store.set("afp",afPlace.value);renderEv()}));
+copyFrom($("#af-copy"),$("#af-out"),$("#af-msg"));
+
+/* Citations */
+const COURTS={SCC:L("Supreme Court of Canada"),CSC:L("Supreme Court of Canada"),FCA:L("Federal Court of Appeal"),CAF:L("Federal Court of Appeal"),FC:L("Federal Court"),CF:L("Federal Court"),SCT:L("Specific Claims Tribunal"),CHRT:L("Canadian Human Rights Tribunal"),SKCA:L("Court of Appeal for Saskatchewan"),SKKB:L("Court of King's Bench for Saskatchewan"),SKQB:L("Court of Queen's Bench for Saskatchewan (renamed King's Bench in 2023)"),SKPC:L("Provincial Court of Saskatchewan"),ABCA:L("Court of Appeal of Alberta"),ABKB:L("Court of King's Bench of Alberta"),ABQB:L("Court of Queen's Bench of Alberta (now King's Bench)"),ABCJ:L("Alberta Court of Justice"),BCCA:L("Court of Appeal for British Columbia"),BCSC:L("Supreme Court of British Columbia"),BCPC:L("Provincial Court of British Columbia"),MBCA:L("Court of Appeal of Manitoba"),MBKB:L("Court of King's Bench of Manitoba"),ONCA:L("Court of Appeal for Ontario"),ONSC:L("Ontario Superior Court of Justice"),ONCJ:L("Ontario Court of Justice"),QCCA:L("Court of Appeal of Quebec"),QCCS:L("Superior Court of Quebec"),QCCQ:L("Court of Québec"),NSCA:L("Nova Scotia Court of Appeal"),NSSC:L("Supreme Court of Nova Scotia"),NBCA:L("Court of Appeal of New Brunswick"),NBKB:L("Court of King's Bench of New Brunswick"),YKCA:L("Court of Appeal of Yukon"),YKSC:L("Supreme Court of Yukon"),NWTSC:L("Supreme Court of the Northwest Territories"),NUCJ:L("Nunavut Court of Justice")};
+function renderCite(){
+  const v=$("#cite-in").value.trim();const m=v.match(/^(\d{4})\s+([A-Za-z]{2,6})\s+(\d{1,5})(?:\s*,?\s*(?:at\s+)?(?:para|par)(?:s|graph)?\.?\s*(\d+))?$/i);
+  if(!m){$("#cite-out").innerHTML=`<p style="color:var(--muted)">${T(S.cite_help)}</p>`;return}
+  const [,yr,ct,no,pa]=m;const C=ct.toUpperCase();const name=COURTS[C]?T(COURTS[C]):T(S.c_unknown);
+  const lvl=/^(SCC|CSC)$/.test(C)?T(S.c_scc):/^(FCA|CAF)$/.test(C)?T(S.c_fca):/CA$/.test(C)?T(S.c_appeal):/^(FC|CF|SCT|CHRT)$/.test(C)?T(S.c_fed):T(S.c_trial);
+  $("#cite-out").innerHTML=`<div class="decoded"><div><small>${esc(T(S.c_year))}</small><b>${esc(yr)}</b></div><div><small>${esc(T(S.c_court))}</small><b>${esc(C)}</b></div><div><small>${esc(T(S.c_no))}</small><b>${esc(no)}</b></div>${pa?`<div><small>${esc(T(S.c_para))}</small><b>${esc(pa)}</b></div>`:""}</div>
+  <p><b>${esc(name)}.</b> ${esc(lvl)} ${esc(T(S.c_nth)(+no,yr))}</p>
+  <p>${link("https://www.canlii.org/en/#search/text="+encodeURIComponent('"'+yr+" "+C+" "+no+'"'),T(S.c_find)+" · "+yr+" "+C+" "+no)}</p>`;
+}
+$("#cite-in").addEventListener("input",renderCite);
+const CANLII=[L(`Go to <a href="https://www.canlii.org" target="_blank" rel="noopener">canlii.org</a>. Choose your province or "Canada (Federal)" so you only see courts that matter to you.`),L(`Search the plain words of your problem in quotation marks, like <code>"judicial review" eviction</code>. Quotation marks keep phrases together.`),L("Read the first and last few paragraphs of a decision first. The ending tells you who won and why."),L(`Check whether the case is still good law. On the case page, open "Cited by" to see later cases. If a higher court reversed it, do not rely on it.`),L("Prefer decisions from higher courts in your own province, and from the Supreme Court of Canada. They bind lower courts. Decisions from other provinces only persuade."),L(`Write down the citation and the paragraph number ("at para 45"), never just the page.`)];
+let csel="all";
+function renderLaw(){
+  $("#canlii-steps").innerHTML=CANLII.map(s=>`<li><div>${T(s)}</div></li>`).join("");
+  $("#db-list").innerHTML=DIR.filter(r=>r.k==="law"&&["CA","SK"].includes(r.p)).map(resHTML).join("")+`<p style="font-size:.9rem;color:var(--muted)">${esc(T(S.db_more))}</p>`;
+  $("#case-filter").innerHTML=Object.entries(CSUB).map(([k,v])=>`<button class="chip" data-cs="${k}" aria-pressed="${k===csel}">${esc(T(v))}</button>`).join("");
+  $("#case-rows").innerHTML=CASES.filter(c=>csel==="all"||c.s===csel).map(c=>`<tr><td><b>${esc(c.n)}</b>${c.s!=="self"?" "+indPill():""}</td><td class="cite">${link("https://www.canlii.org/en/#search/text="+encodeURIComponent(c.c),c.c)}</td><td>${esc(T(c.w))}</td></tr>`).join("");
+  renderCite();
+}
+$("#case-filter").addEventListener("click",e=>{const b=e.target.closest("[data-cs]");if(!b)return;csel=b.dataset.cs;renderLaw()});
+
+/* Rights */
+function renderTopics(){$("#topics").innerHTML=TOPICS.map(t=>`<details class="topic card" style="padding:0"><summary>${t.i?indPill():""}<span>${esc(T(t.t))}</span></summary><div class="body">${T(t.b)}</div></details>`).join("")}
+
+/* Directory */
+const dirP=$("#dir-prov"),dirQ=$("#dir-q");let dkind=new Set();
+function renderDirControls(){const cur=dirP.value||store.get("dirp","SK");dirP.innerHTML=provOpts();dirP.value=cur;dirQ.placeholder=T(S.dir_ph);
+  $("#dir-kinds").innerHTML=Object.entries(KINDS).map(([k,v])=>`<button class="chip" data-dk="${k}" aria-pressed="${dkind.has(k)}">${esc(T(v))}</button>`).join("")}
+$("#dir-kinds").addEventListener("click",e=>{const b=e.target.closest("[data-dk]");if(!b)return;const k=b.dataset.dk;dkind.has(k)?dkind.delete(k):dkind.add(k);b.setAttribute("aria-pressed",dkind.has(k));renderDir()});
+function renderDir(){store.set("dirp",dirP.value);const q=dirQ.value.trim().toLowerCase();const p=dirP.value;
+  const list=DIR.filter(r=>(r.p===p||r.p==="CA")&&(!dkind.size||dkind.has(r.k))&&(!q||(r.n+" "+T(r.d)+" "+T(KINDS[r.k])).toLowerCase().includes(q))).sort((a,b)=>(a.p==="CA")-(b.p==="CA"));
+  const local=list.filter(r=>r.p===p&&p!=="CA").length;
+  $("#dir-count").textContent=T(S.dir_count)(list.length,local,p!=="CA"?T(PROV[p]):"")+(p!=="CA"&&local===0&&!q&&!dkind.size?T(S.dir_none):"");
+  $("#dir-list").innerHTML=list.map(resHTML).join("")||`<p class="empty">${esc(T(S.dir_empty))}</p>`}
+[dirP,dirQ].forEach(el=>el.addEventListener("input",renderDir));
+
+/* Languages */
+const ir={lang:$("#ir-lang"),court:$("#ir-court"),file:$("#ir-file"),date:$("#ir-date")};
+const ir0=store.get("ir",{});Object.keys(ir).forEach(k=>{ir[k].value=ir0[k]||"";ir[k].addEventListener("input",()=>{store.set("ir",Object.fromEntries(Object.keys(ir).map(x=>[x,ir[x].value])));renderIR()})});
+function renderIR(){
+  const v=k=>ir[k].value.trim();
+  ir.lang.placeholder="e.g. Plains Cree (y-dialect)";ir.court.placeholder="e.g. Court of King's Bench, Saskatoon";ir.file.placeholder="e.g. KBG-SA-01234-2026";
+  const dt=v("date")?new Date(v("date")+"T12:00").toLocaleDateString("en-CA",{year:"numeric",month:"long",day:"numeric"}):"[HEARING DATE]";
+  const lang=v("lang")||"[LANGUAGE AND DIALECT]",court=v("court")||"[COURT AND LOCATION]",file=v("file")||"[FILE NUMBER]";
+  $("#ir-out").textContent=`To the Registry of: ${court}\nRe: Request for an interpreter – Court file no. ${file}\n\nI am a self-represented party in this matter. I request the services of an interpreter (${lang}) for the hearing scheduled on ${dt}, and for any later hearings in this file.\n\nMy first language is ${lang}. I do not understand the language of the proceedings well enough to follow and take full part in the hearing. Section 14 of the Canadian Charter of Rights and Freedoms guarantees the assistance of an interpreter.\n\nPlease confirm in writing that an interpreter will attend, and tell me whether any form or further step is required.\n\nThank you,\n\n[YOUR NAME]\n[ADDRESS, PHONE, EMAIL]\n[DATE]`;
+}
+copyFrom($("#ir-copy"),$("#ir-out"),$("#ir-msg"));
+function renderLangs(){
+  $("#lang-cards").innerHTML=LANGS.map(l=>`<div class="card langcard" tabindex="-1" id="lang-${LANGS.indexOf(l)}"><h3>${esc(l.n)}<span>${esc(T(l.e))}</span></h3><p style="color:var(--muted)">${esc(T(l.w))}</p>
+   <div class="status"><b aria-hidden="true">●</b><span>${esc(T(S.status_lbl))}</span></div>
+   <b>${esc(T(S.now_lbl))}</b><ul class="plain">${l.now.map(x=>`<li>${esc(T(x))}</li>`).join("")}</ul></div>`).join("");
+  const kitTerms=GL.map(([t,d])=>`${T(t)}\t${T(d)}\t[translation]`).join("\n");
+  const kitUI=["Find your path","Prepare for court","My case file","Who can help","Deadline","This is legal information, not legal advice."].map(x=>`${x}\t\t[translation]`).join("\n");
+  $("#kit-out").textContent="LANGUAGE: ____  DIALECT: ____  WRITING SYSTEM (syllabics / Roman): ____  TRANSLATOR: ____  CHECKED BY: ____\n\nTERM\tDEFINITION\tTRANSLATION\n"+kitTerms+"\n\n"+kitUI;
+}
+copyFrom($("#kit-copy"),$("#kit-out"),$("#kit-msg"));
+
+/* Glossary */
+function renderGl(){const q=$("#gl-q").value.trim().toLowerCase();const l=GL.filter(([t,d])=>!q||(T(t)+" "+T(d)).toLowerCase().includes(q)).sort((a,b)=>T(a[0]).localeCompare(T(b[0]),"en"));
+  $("#gloss").innerHTML=l.map(([t,d])=>`<div><dt>${esc(T(t))}</dt><dd>${esc(T(d))}</dd></div>`).join("")||`<p class="empty">${esc(T(S.gl_empty))}</p>`}
+$("#gl-q").addEventListener("input",renderGl);
+
+/* ================= Language bar: English now, Indigenous languages in preparation ================= */
+function applyLang(){
+  document.documentElement.lang="en";
+  document.querySelectorAll("[data-t]").forEach(el=>{el.innerHTML=T(S[el.dataset.t])});
+  document.querySelectorAll("[data-t-aria]").forEach(el=>el.setAttribute("aria-label",T(S[el.dataset.tAria])));
+  renderPFControls();renderPF();renderPrep();renderDLControls();renderDL();renderEv();renderLaw();renderTopics();renderDirControls();renderDir();renderIR();renderLangs();renderGl();
+}
+document.querySelectorAll(".lang [data-native]").forEach(b=>b.addEventListener("click",()=>{showTab("langs",false);const c=document.getElementById("lang-"+b.dataset.native);if(c){c.scrollIntoView({block:"start"});c.focus({preventScroll:true})}}));
+applyLang();
+const hash=(location.hash||"").slice(1);
+showTab(tabs.some(b=>b.dataset.tab===hash)?hash:store.get("tab","path"));
+})();
+</script>

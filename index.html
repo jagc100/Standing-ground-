@@ -228,6 +228,13 @@ footer .wrap{display:grid;gap:8px;max-width:80ch;margin-left:auto;margin-right:a
     <div class="field"><label for="cite-in" data-t="cite_l"></label><input id="cite-in" value="2017 SCC 23"></div>
     <div id="cite-out"></div>
   </div>
+  <div class="card">
+    <h3>Is this case still cited?</h3>
+    <p style="color:var(--muted)">Enter a neutral citation (like 2014 SCC 44) to see how many later decisions cite it on CanLII. A high, recent count is a first sign a case is still good law. It does not tell you whether the case was followed or overruled, so always open the cases to confirm.</p>
+    <div class="field" style="max-width:420px"><label for="nu-in">Citation</label><input id="nu-in" value="2014 SCC 44"></div>
+    <div><button class="btn" id="nu-go">Check on CanLII</button></div>
+    <div id="nu-out" aria-live="polite"></div>
+  </div>
   <div class="grid2">
     <div class="card"><h3 data-t="canlii_h"></h3><ol class="steps" id="canlii-steps"></ol></div>
     <div class="card"><h3 data-t="db_h"></h3><div class="res-list" id="db-list"></div></div>
@@ -752,6 +759,34 @@ function renderLaw(){
   renderCite();
 }
 $("#case-filter").addEventListener("click",e=>{const b=e.target.closest("[data-cs]");if(!b)return;csel=b.dataset.cs;renderLaw()});
+
+/* "Still good law?" — later cases citing a decision, via the Standing Ground CanLII service.
+   The service keeps the CanLII API key server-side; this page only reads public results.
+   Live lookups run on the published website; inside a preview that blocks outside
+   connections, it falls back to a direct CanLII link. */
+const CANLII_API="https://express-js-on-vercel-jagc100s-projects.vercel.app";
+const nuGo=$("#nu-go");
+if(nuGo)nuGo.addEventListener("click",async()=>{
+  const c=$("#nu-in").value.trim(),out=$("#nu-out");
+  const search="https://www.canlii.org/en/#search/text="+encodeURIComponent(c);
+  if(!c){out.innerHTML='<p class="empty">Enter a citation like 2014 SCC 44.</p>';return}
+  out.innerHTML='<p class="empty">Checking CanLII…</p>';nuGo.disabled=true;
+  try{
+    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),12000);
+    const r=await fetch(CANLII_API+"/api/canlii/citing?citation="+encodeURIComponent(c),{signal:ctrl.signal});
+    clearTimeout(t);
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||d.error){out.innerHTML=`<div class="result alert">${esc(d.error||("CanLII lookup failed ("+r.status+")."))}</div><p style="font-size:.9rem">${link(search,"Open this citation on CanLII")}</p>`;return}
+    const yr=d.mostRecentYear?` Most recent citing decision: ${d.mostRecentYear}.`:"";
+    const top=(d.cases||[]).slice(0,8).map(x=>`<li>${link(x.searchUrl||search,esc(x.title||x.citation||"(untitled)"))}${x.citation?` <span style="color:var(--muted)">${esc(x.citation)}</span>`:""}</li>`).join("");
+    out.innerHTML=`<div class="result">Cited by ${d.count} later decision${d.count===1?"":"s"} on CanLII.${esc(yr)}</div>
+      <p style="font-size:.9rem;color:var(--muted)">A high, recent count usually means the case is still active law. Open the cases to confirm it was followed, not distinguished or overruled.</p>
+      ${top?`<p style="font-size:.9rem;font-weight:700;margin-top:4px">Some of the later cases:</p><ul class="plain">${top}</ul>`:""}
+      <p style="font-size:.9rem">${link(search,"See the full citing list on CanLII")}</p>`;
+  }catch(e){
+    out.innerHTML=`<div class="result alert">The live CanLII check can't run here (this preview blocks outside connections). It works on the published Standing Ground website.</div><p style="font-size:.9rem">${link(search,"Open this citation on CanLII now")}</p>`;
+  }finally{nuGo.disabled=false}
+});
 
 /* Rights */
 function renderTopics(){$("#topics").innerHTML=TOPICS.map(t=>`<details class="topic card" style="padding:0"><summary>${t.i?indPill():""}<span>${esc(T(t.t))}</span></summary><div class="body">${T(t.b)}</div></details>`).join("")}

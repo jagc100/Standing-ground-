@@ -370,8 +370,8 @@ const S={
  c_find:L("Find it on CanLII"),
  canlii_h:L("How to search CanLII well"),db_h:L("Free databases"),
  db_more:L("Each province's court website has its own rules and forms. Look them up in tab 6."),
- cases_h:L("Key decisions for self-reps and Indigenous rights"),
- cases_p:L("These are Supreme Court of Canada cases. The first applies to every self-represented person. Always read the case itself before you rely on it. A summary is not enough for court."),
+ cases_h:L("Key decisions for self-reps, court procedure and Indigenous rights"),
+ cases_p:L("A starting set: Supreme Court of Canada cases, plus Saskatchewan Court of Appeal and King's Bench decisions on court procedure. Filter by topic or search by keyword. Always read the case itself before you rely on it — a summary is not enough for court."),
  th_case:L("Case"),th_cite:L("Citation"),th_why:L("Why it matters to you"),
  cases_find:L("Search these cases by word, topic or citation"),
  cases_ph:L("e.g. appeal, deadline, consult, fee, 2014 SCC 44"),
@@ -591,9 +591,21 @@ const DL=[
 
 const CASES=[
  {s:"self",n:"Pintea v Johns",c:"2017 SCC 23",w:L("Applies to everyone who represents themselves. Endorses the Canadian Judicial Council's Statement of Principles on Self-represented Litigants: judges must take steps so self-reps understand the process.")},
+ {s:"proc",n:"Hryniak v Mauldin",c:"2014 SCC 7",w:L("Calls for a \"culture shift\" toward timely, affordable, proportionate justice, and broadens summary judgment so a dispute can be resolved without a full trial. Useful when arguing a matter can be decided fairly on the documents.")},
+ {s:"proc",n:"Trial Lawyers Assn of BC v British Columbia (AG)",c:"2014 SCC 59",w:L("Struck down court hearing fees so high they blocked ordinary people from court. Confirms a constitutional right of access to the courts, and that fees must be waivable where they cause undue hardship.")},
+ {s:"proc",n:"R v Imperial Tobacco Canada",c:"2011 SCC 42",w:L("The modern test for striking a claim: only if it is \"plain and obvious,\" taking the pleaded facts as true, that it discloses no reasonable cause of action. Novel claims are read generously and allowed to proceed.")},
+ {s:"proc",n:"Hunt v Carey Canada",c:"1990 CanLII 90 (SCC)",w:L("The origin of the \"plain and obvious\" test. A pleading should not be struck just because it is novel, complex or unlikely to win — only if it cannot possibly succeed. Helps a self-rep resist an early motion to strike.")},
+ {s:"proc",n:"Canada (Citizenship) v Vavilov",c:"2019 SCC 65",w:L("The leading framework for judicial review of a government or tribunal decision. The default standard is \"reasonableness,\" and a decision must be justified with transparent, intelligible reasons — a basis for challenging an unreasonable administrative decision.")},
+ {s:"proc",n:"Dutchak v Dutchak",c:"2009 SKCA 89",w:L("The Saskatchewan Court of Appeal's factors for extending the time to file a notice of appeal: a genuine intention to appeal within time, a reasonable explanation for the delay, no prejudice, and an arguable appeal — applied flexibly toward a just result.")},
+ {s:"proc",n:"Hope v Pylypow",c:"2015 SKCA 26",w:L("The Saskatchewan framework for awarding costs to a successful self-represented litigant for work a lawyer would normally do, and a caution against striking a self-rep's pleadings too readily. Supports both a costs claim and resisting a motion to strike.")},
+ {s:"proc",n:"Barth v Saskatchewan (Social Services)",c:"2021 SKCA 41",w:L("The leading Saskatchewan decision on vexatious-litigant orders: because they limit court access, they are used sparingly and only in the clearest cases of habitual, persistent, groundless proceedings. Explains the line between persistent and vexatious litigation.")},
+ {s:"proc",n:"Boisvert v Milton No 292 (RM)",c:"2015 SKQB 2",w:L("The Saskatchewan test for amending pleadings (King's Bench Rule 3-72): amendments needed to decide the real issues are generally allowed unless they cause prejudice that costs cannot cure, or are scandalous, frivolous or vexatious. Useful for fixing or adding to a claim or defence.")},
+ {s:"proc",n:"Shinkaruk v Neufeld Building Movers",c:"2013 SKQB 411",w:L("The Saskatchewan test for setting aside a noting in default or a default judgment, weighing the explanation for the default, delay, an arguable defence on the merits, and prejudice. Losing a \"windfall\" default judgment is not serious prejudice.")},
  {s:"rights",n:"R v Sparrow",c:"[1990] 1 SCR 1075",w:L("First major s. 35 case. Sets the test for when government can justify limiting an Aboriginal right.")},
+ {s:"treaty",n:"R v Badger",c:"1996 CanLII 236 (SCC)",w:L("Key treaty-interpretation principles: treaties are solemn promises, ambiguities are resolved in favour of Indigenous peoples, and the Crown bears the onus of proving any extinguishment. Important for Prairie and Treaty rights arguments.")},
  {s:"rights",n:"R v Van der Peet",c:"[1996] 2 SCR 507",w:L("Test for proving an Aboriginal right: a practice integral to the group's distinctive culture before contact.")},
  {s:"rights",n:"R v Powley",c:"2003 SCC 43",w:L("How Métis communities prove s. 35 rights (before effective European control).")},
+ {s:"land",n:"Calder v British Columbia (AG)",c:"1973 CanLII 4 (SCC)",w:L("The landmark decision recognizing that Aboriginal title exists in Canadian law independent of any statute or treaty. The historical foundation for all later Aboriginal-rights litigation.")},
  {s:"land",n:"Delgamuukw v British Columbia",c:"[1997] 3 SCR 1010",w:L("Defines Aboriginal title. Confirms oral histories are admissible evidence and must be given proper weight.")},
  {s:"land",n:"Tsilhqot'in Nation v British Columbia",c:"2014 SCC 44",w:L("First declaration of Aboriginal title in Canada. Explains the occupation test.")},
  {s:"consult",n:"Haida Nation v British Columbia",c:"2004 SCC 73",w:L("The Crown must consult, and sometimes accommodate, before acting in ways that may affect rights, even before those rights are proven.")},
@@ -607,7 +619,7 @@ const CASES=[
  {s:"family",n:"Reference re An Act respecting First Nations, Inuit and Métis children, youth and families",c:"2024 SCC 5",w:L("Upholds the federal child welfare law. Indigenous child and family laws can have the force of federal law.")},
  {s:"family",n:"Daniels v Canada",c:"2016 SCC 12",w:L("Métis and non-status Indians are \"Indians\" under s. 91(24) of the Constitution Act, 1867, so Ottawa has jurisdiction over them.")}
 ];
-const CSUB={all:L("All"),self:L("Everyone (self-reps)"),rights:L("Aboriginal rights"),land:L("Title & land"),consult:L("Duty to consult"),treaty:L("Treaty & honour of the Crown"),family:L("Family & jurisdiction")};
+const CSUB={all:L("All"),self:L("Everyone (self-reps)"),proc:L("Court procedure"),rights:L("Aboriginal rights"),land:L("Title & land"),consult:L("Duty to consult"),treaty:L("Treaty & honour of the Crown"),family:L("Family & jurisdiction")};
 const FNMI_CATS=new Set(["rights","land","consult","treaty","family"]);
 
 const TOPICS=[

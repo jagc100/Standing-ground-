@@ -36,13 +36,16 @@ h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.2;margin:0}
 h2{font-size:1.65rem} h3{font-size:1.18rem}
 p{margin:0}
 .wrap{max-width:1040px;margin:0 auto;padding-inline:16px}
-header.top{padding-block:22px 18px;border-bottom:1px solid var(--line)}
+header.top{padding-block:22px 18px;border-bottom:1px solid var(--line);position:relative}
+header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,var(--spruce),var(--sky))}
 .topbar{display:flex;justify-content:flex-end;margin-bottom:10px}
 .lang{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
 .lang button{font:inherit;font-size:.85rem;font-weight:700;background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer}
 .lang button[data-native]{border-style:dashed;font-weight:400}
 .lang button[aria-pressed="true"]{background:var(--spruce);color:var(--spruce-ink)}
-.brand{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.brand{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.brand .mark{flex:0 0 auto;width:46px;height:46px;color:var(--spruce)}
+.brand-text{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;min-width:0}
 .brand h1{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:800;color:var(--spruce)}
 .brand .tag{color:var(--muted);font-size:1rem}
 .lede{max-width:68ch;margin-top:10px}
@@ -134,6 +137,7 @@ td.cite{font-family:var(--mono);font-size:.88rem;white-space:nowrap}
 ul.plain{margin:0;padding-left:1.2rem;display:grid;gap:6px}
 footer{border-top:1px solid var(--line);padding-block:22px 40px;color:var(--muted);font-size:.9rem}
 footer .wrap{display:grid;gap:8px;max-width:80ch;margin-left:auto;margin-right:auto}
+footer .credit{color:var(--fg);font-weight:700}
 @media (max-width:520px){.event{grid-template-columns:1fr auto}.event time{grid-column:1/-1}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -142,8 +146,16 @@ footer .wrap{display:grid;gap:8px;max-width:80ch;margin-left:auto;margin-right:a
   <div class="wrap">
     <div class="topbar"><div class="lang" role="group" aria-label="Language"><button data-lang="en" aria-pressed="true">English</button><button data-native="0" aria-pressed="false" title="In preparation">Nēhiyawēwin</button><button data-native="1" aria-pressed="false" title="In preparation">Anishinaabemowin</button><button data-native="2" aria-pressed="false" title="In preparation">Dene</button><button data-native="3" aria-pressed="false" title="In preparation">ᐃᓄᒃᑎᑐᑦ</button><button data-native="4" aria-pressed="false" title="In preparation">Michif</button></div></div>
     <div class="brand">
-      <h1>Standing Ground</h1>
-      <span class="tag" data-t="tag"></span>
+      <svg class="mark" viewBox="0 0 48 48" role="img" aria-label="Standing Ground emblem" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 3 42 10v12c0 11-7.6 19.4-18 23C13.6 41.4 6 33 6 22V10L24 3Z" fill="currentColor" fill-opacity="0.12"/>
+        <path d="M24 3 42 10v12c0 11-7.6 19.4-18 23C13.6 41.4 6 33 6 22V10L24 3Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+        <path d="M24 14v21M15.5 35h17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M24 14c3.6 2.6 3.6 6.8 0 9.4-3.6-2.6-3.6-6.8 0-9.4Z" fill="currentColor"/>
+      </svg>
+      <div class="brand-text">
+        <h1>Standing Ground</h1>
+        <span class="tag" data-t="tag"></span>
+      </div>
     </div>
     <p class="lede" data-t="lede"></p>
     <div class="welcome" data-t="welcome"></div>
@@ -241,8 +253,10 @@ footer .wrap{display:grid;gap:8px;max-width:80ch;margin-left:auto;margin-right:a
   </div>
   <div class="card">
     <h3 data-t="cases_h"></h3><p style="color:var(--muted)" data-t="cases_p"></p>
+    <div class="field" style="max-width:460px"><label for="case-q" data-t="cases_find"></label><input id="case-q" type="search"></div>
     <div class="chips" id="case-filter" role="group"></div>
     <div class="tablewrap"><table><thead><tr><th data-t="th_case"></th><th data-t="th_cite"></th><th data-t="th_why"></th></tr></thead><tbody id="case-rows"></tbody></table></div>
+    <p id="case-foot" style="font-size:.9rem;color:var(--muted)"></p>
   </div>
 </section>
 
@@ -293,7 +307,7 @@ footer .wrap{display:grid;gap:8px;max-width:80ch;margin-left:auto;margin-right:a
 
 </main>
 
-<footer><div class="wrap"><p data-t="foot1"></p><p data-t="foot2"></p></div></footer>
+<footer><div class="wrap"><p data-t="foot1"></p><p data-t="foot2"></p><p class="credit" data-t="foot3"></p></div></footer>
 
 <script>
 (function(){
@@ -359,6 +373,11 @@ const S={
  cases_h:L("Key decisions for self-reps and Indigenous rights"),
  cases_p:L("These are Supreme Court of Canada cases. The first applies to every self-represented person. Always read the case itself before you rely on it. A summary is not enough for court."),
  th_case:L("Case"),th_cite:L("Citation"),th_why:L("Why it matters to you"),
+ cases_find:L("Search these cases by word, topic or citation"),
+ cases_ph:L("e.g. appeal, deadline, consult, fee, 2014 SCC 44"),
+ cases_none:L("No case in this list matches. Try fewer words, clear the filter, or search all of CanLII below."),
+ cases_count:L(n=>`${n} case${n===1?"":"s"} shown.`),
+ cases_canlii:L("Search all of CanLII for this"),
  rights_h:L("Rights and issues that come up often"),
  rights_p:L("Open a topic for a plain-language summary, the law that governs it, and where the problem is usually decided. Topics marked FNMI apply only to First Nations, Métis and Inuit people. The others apply to everyone."),
  help_h:L("Who can help"),help_p:L("Representing yourself does not mean doing it alone. Courtworkers, legal aid, public legal education groups and law school clinics are free or low cost. Many can review your papers even if they cannot go to court with you."),
@@ -381,6 +400,7 @@ const S={
  gl_find:L("Find a word"),gl_empty:L("No match. Try a shorter word."),
  foot1:L("<b>Standing Ground</b> provides legal information, not legal advice, and no lawyer–client relationship is created by using it. Deadlines, rules and organizations change. Links were checked in October 2026. Confirm anything important with the court registry or a lawyer."),
  foot2:L("Open to everyone in Canada. Your notes, ticks and timeline stay in this browser on this device only."),
+ foot3:L("Standing Ground is built and maintained by Standing Ground Technologies, a First Nations–owned venture in Saskatoon. © 2026."),
  fnmi:L("FNMI")
 };
 
@@ -588,6 +608,7 @@ const CASES=[
  {s:"family",n:"Daniels v Canada",c:"2016 SCC 12",w:L("Métis and non-status Indians are \"Indians\" under s. 91(24) of the Constitution Act, 1867, so Ottawa has jurisdiction over them.")}
 ];
 const CSUB={all:L("All"),self:L("Everyone (self-reps)"),rights:L("Aboriginal rights"),land:L("Title & land"),consult:L("Duty to consult"),treaty:L("Treaty & honour of the Crown"),family:L("Family & jurisdiction")};
+const FNMI_CATS=new Set(["rights","land","consult","treaty","family"]);
 
 const TOPICS=[
  {i:0,t:L("Your right to fair treatment as a self-represented person"),b:L("<p>Judges must make sure that a person without a lawyer understands the process and can present their case. This includes explaining procedure, allowing reasonable flexibility on form, and not penalizing honest mistakes (<i>Pintea v Johns</i>, 2017 SCC 23). It does not mean the judge will argue your case or relax the law itself. You can politely refer to these principles if you feel lost.</p>")},
@@ -755,10 +776,15 @@ function renderLaw(){
   $("#canlii-steps").innerHTML=CANLII.map(s=>`<li><div>${T(s)}</div></li>`).join("");
   $("#db-list").innerHTML=DIR.filter(r=>r.k==="law"&&["CA","SK"].includes(r.p)).map(resHTML).join("")+`<p style="font-size:.9rem;color:var(--muted)">${esc(T(S.db_more))}</p>`;
   $("#case-filter").innerHTML=Object.entries(CSUB).map(([k,v])=>`<button class="chip" data-cs="${k}" aria-pressed="${k===csel}">${esc(T(v))}</button>`).join("");
-  $("#case-rows").innerHTML=CASES.filter(c=>csel==="all"||c.s===csel).map(c=>`<tr><td><b>${esc(c.n)}</b>${c.s!=="self"?" "+indPill():""}</td><td class="cite">${link("https://www.canlii.org/en/#search/text="+encodeURIComponent(c.c),c.c)}</td><td>${esc(T(c.w))}</td></tr>`).join("");
+  const cq=$("#case-q");if(cq&&!cq.placeholder)cq.placeholder=T(S.cases_ph);
+  const q=(cq?cq.value:"").trim().toLowerCase();
+  const rows=CASES.filter(c=>(csel==="all"||c.s===csel)&&(!q||(c.n+" "+c.c+" "+T(c.w)+" "+T(CSUB[c.s]||"")).toLowerCase().includes(q)));
+  $("#case-rows").innerHTML=rows.map(c=>`<tr><td><b>${esc(c.n)}</b>${FNMI_CATS.has(c.s)?" "+indPill():""}</td><td class="cite">${link("https://www.canlii.org/en/#search/text="+encodeURIComponent(c.c),c.c)}</td><td>${esc(T(c.w))}</td></tr>`).join("")||`<tr><td colspan="3" class="empty">${esc(T(S.cases_none))}</td></tr>`;
+  $("#case-foot").innerHTML=esc(T(S.cases_count)(rows.length))+(q?" "+link("https://www.canlii.org/en/#search/text="+encodeURIComponent(q),T(S.cases_canlii)+" →"):"");
   renderCite();
 }
 $("#case-filter").addEventListener("click",e=>{const b=e.target.closest("[data-cs]");if(!b)return;csel=b.dataset.cs;renderLaw()});
+$("#case-q").addEventListener("input",renderLaw);
 
 /* "Still good law?" — later cases citing a decision, via the Standing Ground CanLII service.
    The service keeps the CanLII API key server-side; this page only reads public results.

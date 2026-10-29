@@ -11,7 +11,7 @@ A free, plain-language court preparation tool for people representing themselves
 | Find your path | Likely court or tribunal, first steps, deadlines and local help, by province and type of problem |
 | Prepare for court | Five-stage checklist and court-binder order |
 | My case file | Deadline counter, timeline of events, affidavit draft (stored only in the user's browser) |
-| Look up the law | Citation decoder, CanLII search guide, key Supreme Court of Canada decisions |
+| Look up the law | Citation decoder, a "still cited?" check (live CanLII citing-case counts), CanLII search guide, key Supreme Court of Canada decisions |
 | Rights & issues | Plain-language topics; Indigenous-specific topics are labelled FNMI |
 | Who can help | Directory of courtworkers, legal aid, legal information and complaint bodies |
 | Languages | Interpreter-request letter, Indigenous-language status cards, translator kit |
@@ -19,7 +19,7 @@ A free, plain-language court preparation tool for people representing themselves
 
 ## Running it
 
-`index.html` is a single self-contained page. Open it in a browser, or serve the folder with any static host. It sends no data anywhere; user entries stay in the browser's local storage.
+`index.html` is a single self-contained page. Open it in a browser, or serve the folder with any static host. It sends no data anywhere; user entries stay in the browser's local storage. The "still cited?" check calls a small backend that keeps the CanLII API key private (see the [backend repo](https://github.com/jagc100/express-js-on-vercel)).
 
 ## Languages
 
@@ -27,6 +27,5 @@ Presented in English. Versions in Nēhiyawēwin (Cree), Anishinaabemowin (Ojibwe
 
 ## Roadmap
 
-- CanLII API integration ("still good law?" citing-case counts), served from a small backend that keeps the API key private
 - Indigenous-language versions from partner translations
 - Fuller province-by-province directory
